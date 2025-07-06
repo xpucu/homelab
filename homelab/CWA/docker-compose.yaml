@@ -1,0 +1,26 @@
+
+volumes:
+  calibre-nfs:
+    driver: local
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.1.216,nolock,hard,rw"
+      device: ":/volume1/calibre"
+services:
+  calibre-web-automated:
+    image: crocodilestick/calibre-web-automated:latest
+    container_name: calibre-web-automated
+    environment:
+      # Only change these if you know what you're doing
+      - PUID=1000
+      - PGID=1000
+      # Edit to match your current timezone https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+      - TZ=MST 
+    volumes:
+      - C:\Users\Xpucu\Documents\CalibreWeb\config:/config 
+      - C:\Users\Xpucu\Documents\CalibreWeb\ingest:/cwa-book-ingest
+      - calibre-nfs:/calibre-library 
+    ports:
+      # Change the first number to change the port you want to access the Web UI, not the second
+      - 8083:8083 
+    restart: unless-stopped
