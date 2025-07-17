@@ -1,0 +1,138 @@
+animated_background:
+  default_url: https://cdn.flixel.com/flixel/ypy8bw9fgw1zv2b4htp2.hd.mp4
+  entity: sun.sun
+  state_url:
+    above_horizon:
+      - https://cdn.flixel.com/flixel/lcgczt9lyh7qr0p7wnyj.hd.mp4
+      - https://cdn.flixel.com/flixel/knkmvjypn212ywzh4s7q.hd.mp4
+      - https://cdn.flixel.com/flixel/nl2m3img5siuxsp2cz7e.hd.mp4
+      - https://cdn.flixel.com/flixel/vn1d788icpyow95oxphk.hd.mp4
+      - https://cdn.flixel.com/flixel/l2bjw34wnusyf5q2qq3p.hd.mp4
+    below_horizon:
+      - https://cdn.flixel.com/flixel/qebkh12wmojz8d35mdw5.hd.mp4
+      - https://cdn.flixel.com/flixel/edszxo70ja5nlgziwswc.hd.mp4
+      - https://cdn.flixel.com/flixel/l9ntkcybth4ihlggs98f.hd.mp4
+      - https://cdn.flixel.com/flixel/3lnfjmvxhcv2mrxh8f0v.hd.mp4
+kiosk_mode:
+  non_admin_settings:
+    hide_sidebar: true
+    hide_header: true
+    ignore_entity_settings: true
+    kiosk: true
+    hide_menubutton: true
+  mobile_settings:
+    hide_header: true
+views:
+  - type: sections
+    max_columns: 4
+    title: tv-cast
+    path: tv-cast
+    sections:
+      - type: grid
+        cards:
+          - type: markdown
+            content: >2-
+               <span> {%- set day = now().strftime('%A') -%} {%- if now().hour < 12 -%}
+                      {{ ["Morning", "Mornin'", "Good morning", "Добрутро", "Bonjour", "It's a new day", "Hello", "Howdy", "Hi", "Hiya", "Hi there", "Greetings", "Good to see you", "Welcome back", "Looking good today", "Happy " ~ day, "Hola"] | random }},
+                    {%- elif now().hour < 18 -%}
+                      {{ ["Afternoon", "Aft'noon", "Good afternoon", "Здрасти", "Hello", "Howdy", "Hi", "Hiya", "Hi there", "Greetings", "Good to see you", "Welcome back", "Looking good today", "Happy " ~ day, "Hola"] | random }},
+                    {%- else -%}
+                      {{ ["Evening", "Evenin'", "Noswaith dda", "Bonsoir", "Hello", "Howdy", "Hi", "Hiya", "Hi there", "Greetings", "Welcome back", "Looking good today", "Happy " ~ day, "Hola"] | random }}, 
+                    {%- endif -%}  Xpucu!   {%- if is_state('binary_sensor.workday_sensor',
+                    'on') -%}
+                       <br>It's {{ day }} and it is a workday today.
+                    {%- else -%}
+                      Today is {{ day }} and you have the day off!
+                    {%- endif -%}  {%- set temp = state_attr('weather.pirateweather',
+                    'temperature') -%} {%- set condition = states('weather.pirateweather') -%}
+                    {%- if temp not in [None, 'unknown', 'unavailable'] -%}
+                      Outside it's {{ temp }}° and {{ condition }}.
+                    {%- else -%}
+                      Waiting for weather data...
+                    {%- endif -%} {%- set high =
+                    states('sensor.pirateweather_daytime_high_temperature_0d') | float(0) -%}
+                    {%- if high > 0 -%}
+                      Today's high will be {{ high | round(1) }}°.
+                    {%- endif -%} {%- set forecast = states('sensor.phoenix_condition_day_0')
+                    -%} {%- if forecast not in ['unknown', 'unavailable', 'none'] -%}
+                      Expect   {{ forecast[:1] | lower ~ forecast[1:] }}.
+                    {%- endif -%} {%- set alert_count = states('sensor.pirateweather_alerts')
+                    | int(0) -%} {%- if alert_count == 0 -%}
+                      No weather alerts for Phoenix today.
+                    {%- else -%}
+                       <br> ⚠️ There {{ 'is' if alert_count == 1 else 'are' }} {{ alert_count }} active weather alert{{ '' if alert_count == 1 else 's' }}. Most recent: {{
+                        state_attr('sensor.pirateweather_alerts', 'title') if alert_count == 1 else state_attr('sensor.pirateweather_alerts', 'title_0')
+                      }}.
+                    {%- endif -%} {%- set fuel = states('sensor.perdita_x_dream_car_fuel') |
+                    float(0) -%} {%- set price = states('sensor.gas_station_premium_gas') |
+                    float(0) -%} {%- set capacity = 15.3 -%} {%- set gallons_needed = capacity
+                    * (1 - fuel / 100) -%} {%- set total_cost = gallons_needed * price -%} {%-
+                    if fuel < 30 -%}
+                      <br> ⚠️ You must get gas.
+                    {%- endif -%} {%- if price > 0 -%}
+                       <br> ✅ You have {{ fuel | round(0) }}% of fuel left. Costco premium gas is ${{ '%.2f' | format(price) }}.
+                    {%- else -%}
+                      Waiting for gas price...
+                    {%- endif -%} {%- if fuel > 0 and price > 0 -%}
+                      It will cost about ${{ total_cost | round(2) }} to fill up.
+                    {%- endif -%} 
+                    {%- set azdot_alert = states('sensor.azdot_latest_alert_2') -%} {%- if
+                    azdot_alert not in ['none', 'unavailable', 'unknown'] -%}
+                      <br>⚠️ <strong>Traffic Alert</strong>: {{ azdot_alert }}
+                    {%- endif -%}  {%- if is_state('binary_sensor.pollen_alert', 'on') -%}
+                    <br>⚠️ <strong>Pollen Alert</strong><br> One or more pollen types are at elevated levels. Take your allergy pills today! {%- endif -%}
+                    {%- set allergy_trend =
+                    state_attr('sensor.allergy_index_forecasted_average', 'trend') -%} {%- set
+                    allergy_outlook = state_attr('sensor.allergy_index_forecasted_average',
+                    'outlook') -%} {%- if allergy_trend or allergy_outlook -%}
+                      <br><strong>Allergy Forecast</strong>:
+                      {%- if allergy_trend %} Trend: {{ allergy_trend }}. {% endif -%}
+                      {%- if allergy_outlook %} Outlook: {{ allergy_outlook }}. {% endif -%}
+                    {%- endif -%}
+                     {%- set asthma = state_attr('sensor.asthma_index_forecasted_average', 'trend') -%} <br> Asthma danger is {{ asthma }}
+                     {%- set pressure_spread = states('sensor.barometric_pressure_24h_spread') | float(0) -%}
+                    {%- if pressure_spread > 6 -%}
+                      <br>⚠️ <strong>Rapid Pressure Change</strong><br>
+                      Barometric pressure has changed by {{ pressure_spread | round(1) }} hPa in the last 24 hours.
+                      Take your migraine medication. 
+                    {%- endif -%} 
+                    {%- set pressure_trend = states('sensor.netatmo_pressure_trend') -%}
+                    {%- if pressure_trend in ['up', 'down', 'stable'] -%}
+                      <br>The relative pressure is {{ 'rising' if pressure_trend == 'up' else 'falling' if pressure_trend == 'down' else 'stable' }}.
+                    {%- endif -%}
+              {% set count = states('sensor.noaa_k_index_alerts') | int %}
+
+              {% set alerts = state_attr('sensor.noaa_k_index_alerts',
+              'k_index_alerts') %}
+
+              {% if count >= 1 and alerts != 'none' %}
+                ⚠️ **Space Weather Migraine Alert**  
+                {{ alerts.split('\n\n')[0] }}
+              {% else %}
+                ✅ No space weather migraine alerts today.
+              {% endif %}
+
+                </span>
+            grid_options:
+              columns: full
+              alignment: center
+              vertical: center
+            card_mod:
+              style:
+                .: |
+                  ha-card {
+                    background: rgba(0, 0, 0, 0.5);
+                    backdrop-filter: blur(12px);
+                    -webkit-backdrop-filter: blur(12px);
+                    color: white;
+                    border-radius: 1.5rem;
+                    padding: 2rem;
+                    font-size: 1rem;
+                    line-height: 1.6;
+                    max-width: 900px;
+                    margin: auto;
+                    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+                  }
+        column_span: 4
+    cards: []
+    top_margin: true
