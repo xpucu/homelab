@@ -9,12 +9,15 @@
     - name: Router IP Address
       unique_id: router_ip_address
       value_template: "{{ value_json.data[0].config_network.ip }}"
+
     - name: Router Type
       unique_id: router_type
       value_template: "{{ value_json.data[0].type }}"
+
     - name: License State
       unique_id: router_license_state
       value_template: "{{ value_json.data[0].license_state }}"
+
     - name: Mesh Enabled
       unique_id: router_mesh_enabled
       value_template: "{{ value_json.data[0].mesh_sta_vap_enabled }}"
@@ -181,6 +184,35 @@
           value_template: |
             {{ iif( value_json[4]["message"] | regex_findall('Potential Impacts') != [], 
               value_json[4]["message"] | regex_replace(find='[\S\s]+Potential Impacts: ', replace=''), '') }}
+    - unique_id: noaa_k_index_alerts
+      name: NOAA Geomagnetic K-index Alerts
+      value_template: >
+        {% set today = now().strftime('%Y-%m-%d') %}
+        {{ value_json 
+          | selectattr('product_id', 'match', '^K0[456]A') 
+          | selectattr('issue_datetime', 'search', '^' ~ today)
+          | list | length 
+        }}
+      attributes:
+        - name: k_index_alerts
+          value_template: >
+            {% set today = now().strftime('%Y-%m-%d') %}
+            {% set alerts = value_json 
+              | selectattr('product_id', 'match', '^K0[456]A') 
+              | selectattr('issue_datetime', 'search', '^' ~ today) 
+              | list 
+            %}
+            {% if alerts | length == 0 %}
+              none
+            {% else %}
+              {% for alert in alerts %}
+              - product_id: {{ alert.product_id }}
+                issue_datetime: {{ alert.issue_datetime }}
+                message: "{{ alert.message | replace('\n', ' ')  }}"
+              {% endfor %}
+            {% endif %}
+
+
 - name: NOAA Space Weather - Noon 10.7cm Radio Flux
   resource: https://services.swpc.noaa.gov/products/summary/10cm-flux.json
   scan_interval: 3600
@@ -232,6 +264,7 @@
   resource: https://api.wheretheiss.at/v1/satellites/25544
   scan_interval: 30
   sensor:
+
     - unique_id: iss
       name: International Space Station
       value_template: 'OK'
@@ -260,6 +293,7 @@
   resource: !secret openmeteo_api
   scan_interval: 14400
   sensor:
+
     - unique_id: openmeteo_aq_forecast
       name: OpenMeteo - Hourly Forecast
       value_template: OK
@@ -280,6 +314,7 @@
     x-access-token: !secret openuv_key
     Content-Type: application/json
   sensor:
+
     - unique_id: openuv_forecast
       name: OpenUV - Hourly Forecast
       value_template: OK
@@ -287,11 +322,11 @@
       attributes:
         - name: result
           value_template: '{{ value_json.result }}'
-
 - name: Accuweather - Detailed Hourly Forecast
   resource: !secret accuweather_api
   scan_interval: 3600
   sensor:
+
     - unique_id: accuweather_condition_hourly
       name: Accuweather - Condition - Detailed Hourly Forecast
       value_template: '{{ value_json[0].IconPhrase }}'
@@ -321,6 +356,7 @@
           value_template: '{{ value_json[10].IconPhrase }}'
         - name: 11h
           value_template: '{{ value_json[11].IconPhrase }}'
+
     - unique_id: accuweather_temperature_hourly
       name: Accuweather - Temperature - Detailed Hourly Forecast
       value_template: '{{ value_json[0].Temperature.Value }}'
@@ -351,6 +387,7 @@
           value_template: '{{ value_json[10].Temperature.Value }}'
         - name: 11h
           value_template: '{{ value_json[11].Temperature.Value }}'
+
     - unique_id: accuweather_temperature_hourly
       name: Accuweather - Real Feel Temperature - Detailed Hourly Forecast
       value_template: '{{ value_json[0].RealFeelTemperature.Value }}'
@@ -381,6 +418,7 @@
           value_template: '{{ value_json[10].RealFeelTemperature.Value }}'
         - name: 11h
           value_template: '{{ value_json[11].RealFeelTemperature.Value }}'
+
     - unique_id: accuweather_wind_speed_hourly
       name: Accuweather - Wind - Detailed Hourly Forecast
       value_template: '{{ value_json[0].Wind.Speed.Value }}'
@@ -411,6 +449,7 @@
           value_template: '{{ value_json[10].Wind.Speed.Value }}'
         - name: 11h
           value_template: '{{ value_json[11].Wind.Speed.Value }}'
+
     - unique_id: accuweather_wind_direction_hourly
       name: Accuweather - Wind Direction - Detailed Hourly Forecast
       value_template: '{{ value_json[0].Wind.Direction.Degrees }}'
@@ -441,6 +480,7 @@
           value_template: '{{ value_json[10].Wind.Direction.Degrees }}'
         - name: 11h
           value_template: '{{ value_json[11].Wind.Direction.Degrees }}'
+
     - unique_id: accuweather_relative_humidity_hourly
       name: Accuweather - Relative Humidity - Detailed Hourly Forecast
       value_template: '{{ value_json[0].RelativeHumidity }}'
@@ -471,6 +511,7 @@
           value_template: '{{ value_json[10].RelativeHumidity }}'
         - name: 11h
           value_template: '{{ value_json[11].RelativeHumidity }}'
+
     - unique_id: accuweather_total_precipitation_hourly
       name: Accuweather - Total Precipitation - Detailed Hourly Forecast
       value_template: '{{ value_json[0].TotalLiquid.Value }}'
@@ -501,6 +542,7 @@
           value_template: '{{ value_json[10].TotalLiquid.Value }}'
         - name: 11h
           value_template: '{{ value_json[11].TotalLiquid.Value }}'
+
     - unique_id: accuweather_cloud_cover_hourly
       name: Accuweather - Cloud Cover - Detailed Hourly Forecast
       value_template: '{{ value_json[0].CloudCover }}'
@@ -531,6 +573,7 @@
           value_template: '{{ value_json[10].CloudCover }}'
         - name: 11h
           value_template: '{{ value_json[11].CloudCover }}'
+
     - unique_id: accuweather_solar_irradiance_hourly
       name: Accuweather - Solar Irradiance - Detailed Hourly Forecast
       value_template: '{{ value_json[0].SolarIrradiance.Value }}'
@@ -566,6 +609,7 @@
   resource: !secret waqi_api
   scan_interval: 14400
   sensor:
+
     - unique_id: waqi_forecast_ozone
       name: WAQI - Daily Forecast - Ozone
       value_template: '{{ value_json.data.iaqi.o3.v }}'
@@ -587,6 +631,7 @@
           value_template: '{{ value_json.data.forecast.daily.o3[6].avg }}'
         - name: 5d
           value_template: '{{ value_json.data.forecast.daily.o3[7].avg }}'
+
     - unique_id: waqi_forecast_pm10
       name: WAQI - Daily Forecast - PM10
       value_template: '{{ value_json.data.iaqi.pm10.v }}'
@@ -608,6 +653,7 @@
           value_template: '{{ value_json.data.forecast.daily.pm10[6].avg }}'
         - name: 5d
           value_template: '{{ value_json.data.forecast.daily.pm10[7].avg }}'
+
     - unique_id: waqi_forecast_pm25
       name: WAQI - Daily Forecast - PM2.5
       value_template: '{{ value_json.data.iaqi.pm25.v }}'
@@ -651,6 +697,7 @@
           value_template: "{{ value_json.timeSeries[0].values[0].value[0].value | default('N/A') }}"
         - name: observation_time
           value_template: "{{ value_json.timeSeries[0].values[0].value[0].dateTime | default('N/A') }}"
+
 
 
 - name: Last.fm Top Artists
@@ -787,7 +834,3 @@
           value_template: "{{ value_json.topartists.artist[9].image[3]['#text'] }}"
         - name: MBID
           value_template: "{{ value_json.topartists.artist[9].mbid }}"
-
-
-
-
