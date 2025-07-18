@@ -1,4 +1,14 @@
 - platform: rest
+  name: Random Useless Fact
+  resource: https://uselessfacts.jsph.pl/api/v2/facts/random?language=en
+  method: GET
+  headers:
+    Accept: application/json
+  value_template: "{{ value_json.text }}"
+  scan_interval: 3600
+
+
+- platform: rest
   name: Reddit Profile (xpucu)
   resource: https://reddit.com/user/xpucu/about.json
   value_template: "{{ value_json.data.total_karma | int }}"
