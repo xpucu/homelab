@@ -1,0 +1,255 @@
+- platform: feedparser
+  name: BBC World
+  feed_url: https://feeds.bbci.co.uk/news/world/rss.xml
+  date_format: '%a, %d %b %Y %H:%M:%S %z'
+  show_topn: 10
+  scan_interval:
+    hours: 1
+- platform: feedparser
+  name: Arizona Emergency Information Network (AzEIN)
+  feed_url: https://ein.az.gov/rss.xml
+  date_format: '%a, %d %b %Y %H:%M:%S %z'
+  show_topn: 10
+  scan_interval:
+    hours: 1
+- platform: feedparser
+  name: AZDOT
+  feed_url: https://azdot.gov/rss.xml
+  date_format: '%a, %d %b %Y %H:%M:%S %z'
+  show_topn: 10
+  scan_interval:
+    hours: 1
+
+- platform: feedparser
+  name: New York Times World News
+  feed_url: https://rss.nytimes.com/services/xml/rss/nyt/World.xml
+  date_format: '%a, %d %b %Y %H:%M:%S %z'
+  show_topn: 40
+  scan_interval:
+    hours: 1
+
+- platform: feedparser
+  name: New York Times US News
+  feed_url: https://rss.nytimes.com/services/xml/rss/nyt/US.xml
+  date_format: '%a, %d %b %Y %H:%M:%S %z'
+  show_topn: 40
+  scan_interval:
+    hours: 1
+
+- platform: feedparser
+  name: WP National News
+  feed_url: https://feeds.washingtonpost.com/rss/national?itid=lk_inline_manual_30
+  date_format: '%a, %d %b %Y %H:%M:%S %z'
+  show_topn: 40
+  scan_interval:
+    hours: 1
+
+- platform: feedparser
+  name: CNN Top Stories
+  feed_url: http://rss.cnn.com/rss/cnn_topstories.rss
+  date_format: '%a, %d %b %Y %H:%M:%S %z'
+  show_topn: 40
+  scan_interval:
+    hours: 1
+
+- platform: feedparser
+  name: BBC Americas
+  feed_url: http://newsrss.bbc.co.uk/rss/newsonline_world_edition/americas/rss.xml
+  date_format: '%a, %d %b %Y %H:%M:%S %z'
+  show_topn: 40
+  scan_interval:
+    hours: 1
+- platform: feedparser
+  name: Fox News
+  feed_url: http://feeds.foxnews.com/foxnews/latest
+  date_format: '%a, %d %b %Y %H:%M:%S %z'
+  show_topn: 40
+  scan_interval:
+    hours: 1
+
+- platform: feedparser
+  name: News12 News Feed
+  feed_url: 'https://www.12news.com/feeds/syndication/rss/news'
+  date_format: '%a, %d %b %Y %H:%M:%S %Z'
+  scan_interval:
+    hours: 3
+  inclusions:
+    - title
+    - content
+    - description
+    - link
+    - published
+  exclusions:
+- platform: feedparser
+  name: News12 Arizona Midday Feed
+  feed_url: 'https://www.12news.com/feeds/syndication/rss/entertainment/television/programs/arizona-midday'
+  date_format: '%a, %d %b %Y %H:%M:%S %Z'
+  scan_interval:
+    hours: 3
+  inclusions:
+    - title
+    - content
+    - description
+    - link
+    - published
+  exclusions:
+- platform: feedparser
+  name: News12 Arizona Valley Feed
+  feed_url: 'https://www.12news.com/feeds/syndication/rss/news/local/valley'
+  date_format: '%a, %d %b %Y %H:%M:%S %Z'
+  scan_interval:
+    hours: 3
+  inclusions:
+    - title
+    - content
+    - description
+    - link
+    - published
+  exclusions:
+- platform: feedparser
+  name: ABC Top Stories
+  feed_url: https://feeds.abcnews.com/abcnews/topstories
+  date_format: "%a, %d %b %Y %H:%M:%S %Z"
+  scan_interval:
+    minutes: 15
+  inclusions:
+    - title
+    - content
+    - description
+    - link
+    - published
+  exclusions:
+- platform: feedparser
+  name: ABC15 News
+  feed_url: https://www.abc15.com/news.rss
+  date_format: "%a, %d %b %Y %H:%M:%S %Z"
+  scan_interval:
+    minutes: 15
+  inclusions:
+    - title
+    - content
+    - description
+    - link
+    - published
+  exclusions:
+- platform: feedparser
+  name: Google News
+  feed_url: https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en
+  date_format: "%a, %d %b %Y %H:%M:%S %Z"
+  scan_interval:
+    minutes: 15
+  inclusions:
+    - title
+    - content
+    - description
+    - link
+    - published
+  exclusions:
+- platform: feedparser
+  name: Dnevnik.BG news
+  feed_url: http://www.dnevnik.bg/rss/?rubrid=1657
+  date_format: "%a, %d %b %Y %H:%M:%S %Z"
+  scan_interval:
+    minutes: 15
+  inclusions:
+    - title
+    - content
+    - description
+    - link
+    - published
+  exclusions:
+- platform: feedparser
+  name: Slashdot
+  feed_url: http://rss.slashdot.org/Slashdot/slashdot
+  date_format: "%a, %d %b %Y %H:%M:%S %Z"
+  scan_interval:
+    minutes: 15
+  inclusions:
+    - title
+    - content
+    - description
+    - link
+    - published
+  exclusions:
+- platform: feedparser
+  name: Forbes BG
+  feed_url: https://forbesbulgaria.com/feed/
+  date_format: "%a, %d %b %Y %H:%M:%S %Z"
+  scan_interval:
+    minutes: 15
+  inclusions:
+    - title
+    - content
+    - description
+    - link
+    - published
+  exclusions:
+- platform: feedparser
+  name: KTAR
+  feed_url: http://ktar.com/feed/
+  date_format: "%a, %d %b %Y %H:%M:%S %Z"
+  scan_interval:
+    minutes: 15
+  inclusions:
+    - title
+    - content
+    - description
+    - link
+    - published
+  exclusions:
+
+- platform: feedparser
+  name: Novinite.com
+  feed_url: https://www.novinite.com/services/news_rdf.php
+  date_format: "%a, %d %b %Y %H:%M:%S %Z"
+  scan_interval:
+    minutes: 15
+  inclusions:
+    - title
+    - content
+    - description
+    - link
+    - published
+  exclusions:
+
+- platform: feedparser
+  name: The Sofia Globe
+  feed_url: https://feeds.feedburner.com/TheSofiaGlobe
+  date_format: "%a, %d %b %Y %H:%M:%S %Z"
+  scan_interval:
+    minutes: 15
+  inclusions:
+    - title
+    - content
+    - description
+    - link
+    - published
+  exclusions:
+
+- platform: feedparser
+  name: Capital
+  feed_url: https://www.capital.bg/rss/
+  date_format: "%a, %d %b %Y %H:%M:%S %Z"
+  scan_interval:
+    minutes: 15
+  inclusions:
+    - title
+    - content
+    - description
+    - link
+    - published
+  exclusions:
+
+- platform: feedparser
+  name: Focus news
+  feed_url: https://www.focus-news.net/rss.php?op=top
+  date_format: "%a, %d %b %Y %H:%M:%S %Z"
+  scan_interval:
+    minutes: 15
+  inclusions:
+    - title
+    - content
+    - description
+    - link
+    - published
+  exclusions:

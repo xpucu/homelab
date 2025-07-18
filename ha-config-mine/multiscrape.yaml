@@ -1,0 +1,793 @@
+- resource: https://192.168.1.1/proxy/network/api/s/default/stat/device/
+  method: GET
+  headers:
+    X-API-KEY: !secret unifi_api_key
+  scan_interval: 300  # (in seconds)
+  name: Westeros Info
+  verify_ssl: false
+  sensor:
+    - name: Router IP Address
+      unique_id: router_ip_address
+      value_template: "{{ value_json.data[0].config_network.ip }}"
+    - name: Router Type
+      unique_id: router_type
+      value_template: "{{ value_json.data[0].type }}"
+    - name: License State
+      unique_id: router_license_state
+      value_template: "{{ value_json.data[0].license_state }}"
+    - name: Mesh Enabled
+      unique_id: router_mesh_enabled
+      value_template: "{{ value_json.data[0].mesh_sta_vap_enabled }}"
+
+- name: NOAA Space Weather - Conditions
+  resource: https://services.swpc.noaa.gov/products/noaa-scales.json
+  scan_interval: 3600
+  sensor:
+    - unique_id: noaa_space_weather_R_24hr
+      name: NOAA Space Weather - Radio Blackout Impacts (24-Hour Observed Maximums)
+      value_template: '{{ value_json["-1"].R.Scale }}'
+      attributes:
+        - name: Text
+          value_template: '{{ value_json["-1"].R.Text }}'
+    - unique_id: noaa_space_weather_S_24hr
+      name: NOAA Space Weather - Solar Radiation Storm Impacts (24-Hour Observed Maximums)
+      value_template: '{{ value_json["-1"].S.Scale }}'
+      attributes:
+        - name: Text
+          value_template: '{{ value_json["-1"].S.Text }}'
+    - unique_id: noaa_space_weather_G_24hr
+      name: NOAA Space Weather - Geomagnetic Storm Impacts (24-Hour Observed Maximums)
+      value_template: '{{ value_json["-1"].G.Scale }}'
+      attributes:
+        - name: Text
+          value_template: '{{ value_json["-1"].G.Text }}'
+
+    - unique_id: noaa_space_weather_R_latest
+      name: NOAA Space Weather - Radio Blackout Impacts (Latest Observed)
+      value_template: '{{ value_json["0"].R.Scale }}'
+      attributes:
+        - name: Text
+          value_template: '{{ value_json["0"].R.Text }}'
+    - unique_id: noaa_space_weather_S_latest
+      name: NOAA Space Weather - Solar Radiation Storm Impacts (Latest Observed)
+      value_template: '{{ value_json["0"].S.Scale }}'
+      attributes:
+        - name: Text
+          value_template: '{{ value_json["0"].S.Text }}'
+    - unique_id: noaa_space_weather_G_latest
+      name: NOAA Space Weather - Geomagnetic Storm Impacts (Latest Observed)
+      value_template: '{{ value_json["0"].G.Scale }}'
+      attributes:
+        - name: Text
+          value_template: '{{ value_json["0"].G.Text }}'
+
+    - unique_id: noaa_space_weather_R_MajorProb_1day
+      name: NOAA Space Weather - Radio Blackout Impacts (1 Day Forecast)
+      value_template: '{{ value_json["1"].R.MajorProb }}'
+      unit_of_measurement: '%'
+      attributes:
+        - name: Timestamp
+          value_template: '{{ value_json["1"].DateStamp }} {{ value_json["1"].TimeStamp }}'
+    - unique_id: noaa_space_weather_R_MinorProb_1day
+      name: NOAA Space Weather - Radio Blackout Impacts (1 Day Forecast)
+      value_template: '{{ value_json["1"].R.MinorProb }}'
+      unit_of_measurement: '%'
+      attributes:
+        - name: Timestamp
+          value_template: '{{ value_json["1"].DateStamp }} {{ value_json["1"].TimeStamp }}'
+    - unique_id: noaa_space_weather_S_1day
+      name: NOAA Space Weather - Solar Radiation Storm Impacts (1 Day Forecast)
+      value_template: '{{ value_json["1"].S.Prob }}'
+      unit_of_measurement: '%'
+      attributes:
+        - name: Timestamp
+          value_template: '{{ value_json["1"].DateStamp }} {{ value_json["1"].TimeStamp }}'
+    - unique_id: noaa_space_weather_G_1day
+      name: NOAA Space Weather - Geomagnetic Storm Impacts (1 Day Forecast)
+      value_template: '{{ value_json["1"].G.Scale }}'
+      attributes:
+        - name: Text
+          value_template: '{{ value_json["1"].G.Text }}'
+        - name: Timestamp
+          value_template: '{{ value_json["1"].DateStamp }} {{ value_json["1"].TimeStamp }}'
+# Parse NOAA space weather alert feed.
+- name: NOAA Space Weather - Alerts
+  resource: https://services.swpc.noaa.gov/products/alerts.json
+  scan_interval: 3600
+  sensor:
+    - unique_id: noaa_space_weather_alerts_feed
+      name: NOAA Space Weather - Alerts
+      value_template: '{{ value_json[0]["product_id"] }}'
+      attributes:
+        - name: Entries
+          value_template: |
+            {% set temp = '' %}
+            {% for message in value_json %}
+            - product_id: {{ message.product_id }}
+              issue_datetime: {{ message.issue_datetime }}
+              message: {{ message.message }}
+            {% endfor %}
+    - unique_id: noaa_space_weather_alert_1
+      name: NOAA Space Weather - Alert 1
+      value_template: '{{ value_json[0]["product_id"] }}'
+      attributes:
+        - name: Message
+          value_template: '{{ value_json[0]["message"] }}'
+        - name: Date
+          value_template: '{{ value_json[0]["issue_datetime"] }}'
+        - name: Summary
+          value_template: '{{ value_json[0]["message"]| regex_replace(find="Space Weather.*\n.*\n.*UTC", replace="") | regex_replace(find="Valid[\s\S]+", replace="") | regex_replace(find="Continuation[\s\S]+", replace="") | regex_replace(find="Observed[\s\S]+", replace="") }}'
+        - name: Potential Impacts
+          value_template: |
+            {% if value_json[0]["message"] | regex_findall('Potential Impacts') != [] %}
+              {{ value_json[0]["message"] | regex_replace(find='[\S\s]+Potential Impacts: ', replace='') }}
+            {% else %}
+              ''
+            {% endif %}
+
+    - unique_id: noaa_space_weather_alert_2
+      name: NOAA Space Weather - Alert 2
+      value_template: '{{ value_json[1]["product_id"] }}'
+      attributes:
+        - name: Message
+          value_template: '{{ value_json[1]["message"] }}'
+        - name: Date
+          value_template: '{{ value_json[1]["issue_datetime"] }}'
+        - name: Summary
+          value_template: '{{ value_json[1]["message"]| regex_replace(find="Space Weather.*\n.*\n.*UTC", replace="") | regex_replace(find="Valid[\s\S]+", replace="") | regex_replace(find="Continuation[\s\S]+", replace="") | regex_replace(find="Observed[\s\S]+", replace="") }}'
+        - name: Potential Impacts
+          value_template: |
+            {{ iif( value_json[1]["message"] | regex_findall('Potential Impacts') != [], 
+              value_json[1]["message"] | regex_replace(find='[\S\s]+Potential Impacts: ', replace=''), '') }}
+    - unique_id: noaa_space_weather_alert_3
+      name: NOAA Space Weather - Alert 3
+      value_template: '{{ value_json[2]["product_id"] }}'
+      attributes:
+        - name: Message
+          value_template: '{{ value_json[2]["message"] }}'
+        - name: Date
+          value_template: '{{ value_json[2]["issue_datetime"] }}'
+        - name: Summary
+          value_template: '{{ value_json[2]["message"]| regex_replace(find="Space Weather.*\n.*\n.*UTC", replace="") | regex_replace(find="Valid[\s\S]+", replace="") | regex_replace(find="Continuation[\s\S]+", replace="") | regex_replace(find="Observed[\s\S]+", replace="") }}'
+        - name: Potential Impacts
+          value_template: |
+            {{ if( value_json[2]["message"] | regex_findall('Potential Impacts') != [], 
+              value_json[2]["message"] | regex_replace(find='[\S\s]+Potential Impacts: ', replace=''), '') }}
+    - unique_id: noaa_space_weather_alert_4
+      name: NOAA Space Weather - Alert 4
+      value_template: '{{ value_json[3]["product_id"] }}'
+      attributes:
+        - name: Message
+          value_template: '{{ value_json[3]["message"] }}'
+        - name: Date
+          value_template: '{{ value_json[3]["issue_datetime"] }}'
+        - name: Summary
+          value_template: '{{ value_json[3]["message"]| regex_replace(find="Space Weather.*\n.*\n.*UTC", replace="") | regex_replace(find="Valid[\s\S]+", replace="") | regex_replace(find="Continuation[\s\S]+", replace="") | regex_replace(find="Observed[\s\S]+", replace="") }}'
+        - name: Potential Impacts
+          value_template: |
+            {{ iif( value_json[3]["message"] | regex_findall('Potential Impacts') != [], 
+              value_json[3]["message"] | regex_replace(find='[\S\s]+Potential Impacts: ', replace=''), '') }}
+    - unique_id: noaa_space_weather_alert_5
+      name: NOAA Space Weather - Alert 5
+      value_template: '{{ value_json[4]["product_id"] }}'
+      attributes:
+        - name: Message
+          value_template: '{{ value_json[4]["message"] }}'
+        - name: Date
+          value_template: '{{ value_json[4]["issue_datetime"] }}'
+        - name: Summary
+          value_template: '{{ value_json[4]["message"]| regex_replace(find="Space Weather.*\n.*\n.*UTC", replace="") | regex_replace(find="Valid[\s\S]+", replace="") | regex_replace(find="Continuation[\s\S]+", replace="") | regex_replace(find="Observed[\s\S]+", replace="") }}'
+        - name: Potential Impacts
+          value_template: |
+            {{ iif( value_json[4]["message"] | regex_findall('Potential Impacts') != [], 
+              value_json[4]["message"] | regex_replace(find='[\S\s]+Potential Impacts: ', replace=''), '') }}
+- name: NOAA Space Weather - Noon 10.7cm Radio Flux
+  resource: https://services.swpc.noaa.gov/products/summary/10cm-flux.json
+  scan_interval: 3600
+  sensor:
+    - unique_id: noaa_space_weather_noon_10_7cm_radio_flux
+      name: NOAA Space Weather - Noon 10.7cm Radio Flux
+      value_template: "{{ value_json.Flux | int }}"
+      unit_of_measurement: "sfu"
+      attributes:
+        - name: Timestamp
+          value_template: '{{ value_json.TimeStamp }}'
+
+- name: NOAA Space Weather - Solar Wind Magnetic Fields - Bt
+  resource: https://services.swpc.noaa.gov/products/summary/solar-wind-mag-field.json
+  scan_interval: 3600
+  sensor:
+    - unique_id: noaa_space_weather_solar_wind_magnetic_fields_bt
+      name: NOAA Space Weather - Solar Wind Magnetic Fields - Bt
+      value_template: "{{ value_json.Bt | int }}"
+      unit_of_measurement: "nT"
+      attributes:
+        - name: Timestamp
+          value_template: '{{ value_json.TimeStamp }}'
+
+- name: NOAA Space Weather - Solar Wind Magnetic Fields - Bz
+  resource: https://services.swpc.noaa.gov/products/summary/solar-wind-mag-field.json
+  scan_interval: 3600
+  sensor:
+    - unique_id: noaa_space_weather_solar_wind_magnetic_fields_bz
+      name: NOAA Space Weather - Solar Wind Magnetic Fields - Bz
+      value_template: "{{ value_json.Bz | int }}"
+      unit_of_measurement: "nT"
+      attributes:
+        - name: Timestamp
+          value_template: '{{ value_json.TimeStamp }}'
+
+- name: NOAA Space Weather - Solar Wind Speed
+  resource: https://services.swpc.noaa.gov/products/summary/solar-wind-speed.json
+  scan_interval: 3600
+  sensor:
+    - unique_id: noaa_space_weather_solar_wind_speed
+      name: NOAA Space Weather - Solar Wind Speed
+      value_template: "{{ value_json.WindSpeed | int }}"
+      unit_of_measurement: "km/sec"
+      attributes:
+        - name: Timestamp
+          value_template: '{{ value_json.TimeStamp }}'
+- name: International Space Station
+  resource: https://api.wheretheiss.at/v1/satellites/25544
+  scan_interval: 30
+  sensor:
+    - unique_id: iss
+      name: International Space Station
+      value_template: 'OK'
+      attributes:
+        - name: latitude
+          value_template: '{{ value_json.latitude }}'
+        - name: longitude
+          value_template: '{{ value_json.longitude }}'
+        - name: altitude
+          value_template: '{{ value_json.altitude }}'
+        - name: velocity
+          value_template: '{{ value_json.velocity }}'
+        - name: visibility
+          value_template: '{{ value_json.visibility }}'
+
+    - unique_id: iss_velocity
+      name: International Space Station - Velocity
+      value_template: '{{ value_json.velocity }}'
+      unit_of_measurement: "km/h"
+
+    - unique_id: iss_altitude
+      name: International Space Station - Altitude
+      value_template: '{{ value_json.altitude }}'
+      unit_of_measurement: "km"
+- name: OpenMeteo Forecast
+  resource: !secret openmeteo_api
+  scan_interval: 14400
+  sensor:
+    - unique_id: openmeteo_aq_forecast
+      name: OpenMeteo - Hourly Forecast
+      value_template: OK
+      icon: mdi:weather-windy
+      attributes:
+        - name: time
+          value_template: '{{ value_json.hourly.time }}'
+        - name: us_aqi_pm2_5
+          value_template: '{{ value_json.hourly.us_aqi_pm2_5 }}'
+        - name: us_aqi_pm10
+          value_template: '{{ value_json.hourly.us_aqi_pm10 }}'
+        - name: us_aqi_o3
+          value_template: '{{ value_json.hourly.us_aqi_o3 }}'
+- name: OpenUV Forecast
+  resource: !secret openuv_url
+  scan_interval: 43200
+  headers:
+    x-access-token: !secret openuv_key
+    Content-Type: application/json
+  sensor:
+    - unique_id: openuv_forecast
+      name: OpenUV - Hourly Forecast
+      value_template: OK
+      icon: mdi:weather-sunny-alert
+      attributes:
+        - name: result
+          value_template: '{{ value_json.result }}'
+
+- name: Accuweather - Detailed Hourly Forecast
+  resource: !secret accuweather_api
+  scan_interval: 3600
+  sensor:
+    - unique_id: accuweather_condition_hourly
+      name: Accuweather - Condition - Detailed Hourly Forecast
+      value_template: '{{ value_json[0].IconPhrase }}'
+      icon: mdi:weather-windy
+      attributes:
+        - name: 0h
+          value_template: '{{ value_json[0].IconPhrase }}'
+        - name: 1h
+          value_template: '{{ value_json[1].IconPhrase }}'
+        - name: 2h
+          value_template: '{{ value_json[2].IconPhrase }}'
+        - name: 3h
+          value_template: '{{ value_json[3].IconPhrase }}'
+        - name: 4h
+          value_template: '{{ value_json[4].IconPhrase }}'
+        - name: 5h
+          value_template: '{{ value_json[5].IconPhrase }}'
+        - name: 6h
+          value_template: '{{ value_json[6].IconPhrase }}'
+        - name: 7h
+          value_template: '{{ value_json[7].IconPhrase }}'
+        - name: 8h
+          value_template: '{{ value_json[8].IconPhrase }}'
+        - name: 9h
+          value_template: '{{ value_json[9].IconPhrase }}'
+        - name: 10h
+          value_template: '{{ value_json[10].IconPhrase }}'
+        - name: 11h
+          value_template: '{{ value_json[11].IconPhrase }}'
+    - unique_id: accuweather_temperature_hourly
+      name: Accuweather - Temperature - Detailed Hourly Forecast
+      value_template: '{{ value_json[0].Temperature.Value }}'
+      unit_of_measurement: '°C'
+      icon: mdi:weather-windy
+      attributes:
+        - name: 0h
+          value_template: '{{ value_json[0].Temperature.Value }}'
+        - name: 1h
+          value_template: '{{ value_json[1].Temperature.Value }}'
+        - name: 2h
+          value_template: '{{ value_json[2].Temperature.Value }}'
+        - name: 3h
+          value_template: '{{ value_json[3].Temperature.Value }}'
+        - name: 4h
+          value_template: '{{ value_json[4].Temperature.Value }}'
+        - name: 5h
+          value_template: '{{ value_json[5].Temperature.Value }}'
+        - name: 6h
+          value_template: '{{ value_json[6].Temperature.Value }}'
+        - name: 7h
+          value_template: '{{ value_json[7].Temperature.Value }}'
+        - name: 8h
+          value_template: '{{ value_json[8].Temperature.Value }}'
+        - name: 9h
+          value_template: '{{ value_json[9].Temperature.Value }}'
+        - name: 10h
+          value_template: '{{ value_json[10].Temperature.Value }}'
+        - name: 11h
+          value_template: '{{ value_json[11].Temperature.Value }}'
+    - unique_id: accuweather_temperature_hourly
+      name: Accuweather - Real Feel Temperature - Detailed Hourly Forecast
+      value_template: '{{ value_json[0].RealFeelTemperature.Value }}'
+      unit_of_measurement: '°C'
+      icon: mdi:weather-windy
+      attributes:
+        - name: 0h
+          value_template: '{{ value_json[0].RealFeelTemperature.Value }}'
+        - name: 1h
+          value_template: '{{ value_json[1].RealFeelTemperature.Value }}'
+        - name: 2h
+          value_template: '{{ value_json[2].RealFeelTemperature.Value }}'
+        - name: 3h
+          value_template: '{{ value_json[3].RealFeelTemperature.Value }}'
+        - name: 4h
+          value_template: '{{ value_json[4].RealFeelTemperature.Value }}'
+        - name: 5h
+          value_template: '{{ value_json[5].RealFeelTemperature.Value }}'
+        - name: 6h
+          value_template: '{{ value_json[6].RealFeelTemperature.Value }}'
+        - name: 7h
+          value_template: '{{ value_json[7].RealFeelTemperature.Value }}'
+        - name: 8h
+          value_template: '{{ value_json[8].RealFeelTemperature.Value }}'
+        - name: 9h
+          value_template: '{{ value_json[9].RealFeelTemperature.Value }}'
+        - name: 10h
+          value_template: '{{ value_json[10].RealFeelTemperature.Value }}'
+        - name: 11h
+          value_template: '{{ value_json[11].RealFeelTemperature.Value }}'
+    - unique_id: accuweather_wind_speed_hourly
+      name: Accuweather - Wind - Detailed Hourly Forecast
+      value_template: '{{ value_json[0].Wind.Speed.Value }}'
+      unit_of_measurement: 'km/h'
+      icon: mdi:weather-windy
+      attributes:
+        - name: 0h
+          value_template: '{{ value_json[0].Wind.Speed.Value }}'
+        - name: 1h
+          value_template: '{{ value_json[1].Wind.Speed.Value }}'
+        - name: 2h
+          value_template: '{{ value_json[2].Wind.Speed.Value }}'
+        - name: 3h
+          value_template: '{{ value_json[3].Wind.Speed.Value }}'
+        - name: 4h
+          value_template: '{{ value_json[4].Wind.Speed.Value }}'
+        - name: 5h
+          value_template: '{{ value_json[5].Wind.Speed.Value }}'
+        - name: 6h
+          value_template: '{{ value_json[6].Wind.Speed.Value }}'
+        - name: 7h
+          value_template: '{{ value_json[7].Wind.Speed.Value }}'
+        - name: 8h
+          value_template: '{{ value_json[8].Wind.Speed.Value }}'
+        - name: 9h
+          value_template: '{{ value_json[9].Wind.Speed.Value }}'
+        - name: 10h
+          value_template: '{{ value_json[10].Wind.Speed.Value }}'
+        - name: 11h
+          value_template: '{{ value_json[11].Wind.Speed.Value }}'
+    - unique_id: accuweather_wind_direction_hourly
+      name: Accuweather - Wind Direction - Detailed Hourly Forecast
+      value_template: '{{ value_json[0].Wind.Direction.Degrees }}'
+      unit_of_measurement: '°'
+      icon: mdi:navigation
+      attributes:
+        - name: 0h
+          value_template: '{{ value_json[0].Wind.Direction.Degrees }}'
+        - name: 1h
+          value_template: '{{ value_json[1].Wind.Direction.Degrees }}'
+        - name: 2h
+          value_template: '{{ value_json[2].Wind.Direction.Degrees }}'
+        - name: 3h
+          value_template: '{{ value_json[3].Wind.Direction.Degrees }}'
+        - name: 4h
+          value_template: '{{ value_json[4].Wind.Direction.Degrees }}'
+        - name: 5h
+          value_template: '{{ value_json[5].Wind.Direction.Degrees }}'
+        - name: 6h
+          value_template: '{{ value_json[6].Wind.Direction.Degrees }}'
+        - name: 7h
+          value_template: '{{ value_json[7].Wind.Direction.Degrees }}'
+        - name: 8h
+          value_template: '{{ value_json[8].Wind.Direction.Degrees }}'
+        - name: 9h
+          value_template: '{{ value_json[9].Wind.Direction.Degrees }}'
+        - name: 10h
+          value_template: '{{ value_json[10].Wind.Direction.Degrees }}'
+        - name: 11h
+          value_template: '{{ value_json[11].Wind.Direction.Degrees }}'
+    - unique_id: accuweather_relative_humidity_hourly
+      name: Accuweather - Relative Humidity - Detailed Hourly Forecast
+      value_template: '{{ value_json[0].RelativeHumidity }}'
+      unit_of_measurement: '%'
+      icon: mdi:water
+      attributes:
+        - name: 0h
+          value_template: '{{ value_json[0].RelativeHumidity }}'
+        - name: 1h
+          value_template: '{{ value_json[1].RelativeHumidity }}'
+        - name: 2h
+          value_template: '{{ value_json[2].RelativeHumidity }}'
+        - name: 3h
+          value_template: '{{ value_json[3].RelativeHumidity }}'
+        - name: 4h
+          value_template: '{{ value_json[4].RelativeHumidity }}'
+        - name: 5h
+          value_template: '{{ value_json[5].RelativeHumidity }}'
+        - name: 6h
+          value_template: '{{ value_json[6].RelativeHumidity }}'
+        - name: 7h
+          value_template: '{{ value_json[7].RelativeHumidity }}'
+        - name: 8h
+          value_template: '{{ value_json[8].RelativeHumidity }}'
+        - name: 9h
+          value_template: '{{ value_json[9].RelativeHumidity }}'
+        - name: 10h
+          value_template: '{{ value_json[10].RelativeHumidity }}'
+        - name: 11h
+          value_template: '{{ value_json[11].RelativeHumidity }}'
+    - unique_id: accuweather_total_precipitation_hourly
+      name: Accuweather - Total Precipitation - Detailed Hourly Forecast
+      value_template: '{{ value_json[0].TotalLiquid.Value }}'
+      unit_of_measurement: 'mm'
+      icon: mdi:weather-rainy
+      attributes:
+        - name: 0h
+          value_template: '{{ value_json[0].TotalLiquid.Value }}'
+        - name: 1h
+          value_template: '{{ value_json[1].TotalLiquid.Value }}'
+        - name: 2h
+          value_template: '{{ value_json[2].TotalLiquid.Value }}'
+        - name: 3h
+          value_template: '{{ value_json[3].TotalLiquid.Value }}'
+        - name: 4h
+          value_template: '{{ value_json[4].TotalLiquid.Value }}'
+        - name: 5h
+          value_template: '{{ value_json[5].TotalLiquid.Value }}'
+        - name: 6h
+          value_template: '{{ value_json[6].TotalLiquid.Value }}'
+        - name: 7h
+          value_template: '{{ value_json[7].TotalLiquid.Value }}'
+        - name: 8h
+          value_template: '{{ value_json[8].TotalLiquid.Value }}'
+        - name: 9h
+          value_template: '{{ value_json[9].TotalLiquid.Value }}'
+        - name: 10h
+          value_template: '{{ value_json[10].TotalLiquid.Value }}'
+        - name: 11h
+          value_template: '{{ value_json[11].TotalLiquid.Value }}'
+    - unique_id: accuweather_cloud_cover_hourly
+      name: Accuweather - Cloud Cover - Detailed Hourly Forecast
+      value_template: '{{ value_json[0].CloudCover }}'
+      unit_of_measurement: '%'
+      icon: mdi:weather-cloudy
+      attributes:
+        - name: 0h
+          value_template: '{{ value_json[0].CloudCover }}'
+        - name: 1h
+          value_template: '{{ value_json[1].CloudCover }}'
+        - name: 2h
+          value_template: '{{ value_json[2].CloudCover }}'
+        - name: 3h
+          value_template: '{{ value_json[3].CloudCover }}'
+        - name: 4h
+          value_template: '{{ value_json[4].CloudCover }}'
+        - name: 5h
+          value_template: '{{ value_json[5].CloudCover }}'
+        - name: 6h
+          value_template: '{{ value_json[6].CloudCover }}'
+        - name: 7h
+          value_template: '{{ value_json[7].CloudCover }}'
+        - name: 8h
+          value_template: '{{ value_json[8].CloudCover }}'
+        - name: 9h
+          value_template: '{{ value_json[9].CloudCover }}'
+        - name: 10h
+          value_template: '{{ value_json[10].CloudCover }}'
+        - name: 11h
+          value_template: '{{ value_json[11].CloudCover }}'
+    - unique_id: accuweather_solar_irradiance_hourly
+      name: Accuweather - Solar Irradiance - Detailed Hourly Forecast
+      value_template: '{{ value_json[0].SolarIrradiance.Value }}'
+      unit_of_measurement: 'W/m²'
+      icon: mdi:weather-sunny
+      attributes:
+        - name: 0h
+          value_template: '{{ value_json[0].SolarIrradiance.Value }}'
+        - name: 1h
+          value_template: '{{ value_json[1].SolarIrradiance.Value }}'
+        - name: 2h
+          value_template: '{{ value_json[2].SolarIrradiance.Value }}'
+        - name: 3h
+          value_template: '{{ value_json[3].SolarIrradiance.Value }}'
+        - name: 4h
+          value_template: '{{ value_json[4].SolarIrradiance.Value }}'
+        - name: 5h
+          value_template: '{{ value_json[5].SolarIrradiance.Value }}'
+        - name: 6h
+          value_template: '{{ value_json[6].SolarIrradiance.Value }}'
+        - name: 7h
+          value_template: '{{ value_json[7].SolarIrradiance.Value }}'
+        - name: 8h
+          value_template: '{{ value_json[8].SolarIrradiance.Value }}'
+        - name: 9h
+          value_template: '{{ value_json[9].SolarIrradiance.Value }}'
+        - name: 10h
+          value_template: '{{ value_json[10].SolarIrradiance.Value }}'
+        - name: 11h
+          value_template: '{{ value_json[11].SolarIrradiance.Value }}'
+
+- name: WAQI Forecast
+  resource: !secret waqi_api
+  scan_interval: 14400
+  sensor:
+    - unique_id: waqi_forecast_ozone
+      name: WAQI - Daily Forecast - Ozone
+      value_template: '{{ value_json.data.iaqi.o3.v }}'
+      icon: mdi:weather-windy
+      attributes:
+        - name: 2d_ago
+          value_template: '{{ value_json.data.forecast.daily.o3[0].avg }}'
+        - name: 1d_ago
+          value_template: '{{ value_json.data.forecast.daily.o3[1].avg }}'
+        - name: 0d
+          value_template: '{{ value_json.data.forecast.daily.o3[2].avg }}'
+        - name: 1d
+          value_template: '{{ value_json.data.forecast.daily.o3[3].avg }}'
+        - name: 2d
+          value_template: '{{ value_json.data.forecast.daily.o3[4].avg }}'
+        - name: 3d
+          value_template: '{{ value_json.data.forecast.daily.o3[5].avg }}'
+        - name: 4d
+          value_template: '{{ value_json.data.forecast.daily.o3[6].avg }}'
+        - name: 5d
+          value_template: '{{ value_json.data.forecast.daily.o3[7].avg }}'
+    - unique_id: waqi_forecast_pm10
+      name: WAQI - Daily Forecast - PM10
+      value_template: '{{ value_json.data.iaqi.pm10.v }}'
+      icon: mdi:weather-windy
+      attributes:
+        - name: 2d_ago
+          value_template: '{{ value_json.data.forecast.daily.pm10[0].avg }}'
+        - name: 1d_ago
+          value_template: '{{ value_json.data.forecast.daily.pm10[1].avg }}'
+        - name: 0d
+          value_template: '{{ value_json.data.forecast.daily.pm10[2].avg }}'
+        - name: 1d
+          value_template: '{{ value_json.data.forecast.daily.pm10[3].avg }}'
+        - name: 2d
+          value_template: '{{ value_json.data.forecast.daily.pm10[4].avg }}'
+        - name: 3d
+          value_template: '{{ value_json.data.forecast.daily.pm10[5].avg }}'
+        - name: 4d
+          value_template: '{{ value_json.data.forecast.daily.pm10[6].avg }}'
+        - name: 5d
+          value_template: '{{ value_json.data.forecast.daily.pm10[7].avg }}'
+    - unique_id: waqi_forecast_pm25
+      name: WAQI - Daily Forecast - PM2.5
+      value_template: '{{ value_json.data.iaqi.pm25.v }}'
+      icon: mdi:weather-windy
+      attributes:
+        - name: 2d_ago
+          value_template: '{{ value_json.data.forecast.daily.pm25[0].avg }}'
+        - name: 1d_ago
+          value_template: '{{ value_json.data.forecast.daily.pm25[1].avg }}'
+        - name: 0d
+          value_template: '{{ value_json.data.forecast.daily.pm25[2].avg }}'
+        - name: 1d
+          value_template: '{{ value_json.data.forecast.daily.pm25[3].avg }}'
+        - name: 2d
+          value_template: '{{ value_json.data.forecast.daily.pm25[4].avg }}'
+        - name: 3d
+          value_template: '{{ value_json.data.forecast.daily.pm25[5].avg }}'
+        - name: 4d
+          value_template: '{{ value_json.data.forecast.daily.pm25[6].avg }}'
+        - name: 5d
+          value_template: '{{ value_json.data.forecast.daily.pm25[7].avg }}'
+
+# I give up. This is NEVER going to work...
+- name: lake_mead
+  resource: https://waterservices.usgs.gov/nwis/iv/?format=json&sites=09421500&parameterCd=00065
+  scan_interval: 3600
+  sensor:
+    - name: lake_mead_water_level
+      unique_id: lake_mead_water_level
+      value_template: >
+        {% set val = value_json.timeSeries[0].values[0].value[0].value | default('') %}
+        {% if val is string and val | float(default=none) is not none %}
+          {{ val | float }}
+        {% else %}
+          0
+        {% endif %}
+      # Do NOT set unit_of_measurement or device_class here unless you're 100% sure of data
+      force_update: true
+      attributes:
+        - name: raw_value
+          value_template: "{{ value_json.timeSeries[0].values[0].value[0].value | default('N/A') }}"
+        - name: observation_time
+          value_template: "{{ value_json.timeSeries[0].values[0].value[0].dateTime | default('N/A') }}"
+
+
+- name: Last.fm Top Artists
+  resource: !secret last_fm_api_url_top_artists
+  scan_interval: 3600
+  sensor:
+    - unique_id: last_fm_top_artists_01
+      name: Last.fm Top Artists 01
+      icon: fab:lastfm-square
+      value_template: "{{ value_json.topartists.artist[0].name }}"
+      attributes:
+        - name: Artist Name
+          value_template: "{{ value_json.topartists.artist[0].name }}"
+        - name: Play Count
+          value_template: "{{ value_json.topartists.artist[0].playcount }}"
+        - name: Art
+          value_template: "{{ value_json.topartists.artist[0].image[3]['#text'] }}"
+        - name: MBID
+          value_template: "{{ value_json.topartists.artist[0].mbid }}"
+    - unique_id: last_fm_top_artists_02
+      name: Last.fm Top Artists 02
+      icon: fab:lastfm-square
+      value_template: "{{ value_json.topartists.artist[1].name }}"
+      attributes:
+        - name: Artist Name
+          value_template: "{{ value_json.topartists.artist[1].name }}"
+        - name: Play Count
+          value_template: "{{ value_json.topartists.artist[1].playcount }}"
+        - name: Art
+          value_template: "{{ value_json.topartists.artist[1].image[3]['#text'] }}"
+        - name: MBID
+          value_template: "{{ value_json.topartists.artist[1].mbid }}"
+    - unique_id: last_fm_top_artists_03
+      name: Last.fm Top Artists 03
+      icon: fab:lastfm-square
+      value_template: "{{ value_json.topartists.artist[2].name }}"
+      attributes:
+        - name: Artist Name
+          value_template: "{{ value_json.topartists.artist[2].name }}"
+        - name: Play Count
+          value_template: "{{ value_json.topartists.artist[2].playcount }}"
+        - name: Art
+          value_template: "{{ value_json.topartists.artist[2].image[3]['#text'] }}"
+        - name: MBID
+          value_template: "{{ value_json.topartists.artist[2].mbid }}"
+    - unique_id: last_fm_top_artists_04
+      name: Last.fm Top Artists 04
+      icon: fab:lastfm-square
+      value_template: "{{ value_json.topartists.artist[3].name }}"
+      attributes:
+        - name: Artist Name
+          value_template: "{{ value_json.topartists.artist[3].name }}"
+        - name: Play Count
+          value_template: "{{ value_json.topartists.artist[3].playcount }}"
+        - name: Art
+          value_template: "{{ value_json.topartists.artist[3].image[3]['#text'] }}"
+        - name: MBID
+          value_template: "{{ value_json.topartists.artist[3].mbid }}"
+    - unique_id: last_fm_top_artists_05
+      name: Last.fm Top Artists 05
+      icon: fab:lastfm-square
+      value_template: "{{ value_json.topartists.artist[4].name }}"
+      attributes:
+        - name: Artist Name
+          value_template: "{{ value_json.topartists.artist[4].name }}"
+        - name: Play Count
+          value_template: "{{ value_json.topartists.artist[4].playcount }}"
+        - name: Art
+          value_template: "{{ value_json.topartists.artist[4].image[3]['#text'] }}"
+        - name: MBID
+          value_template: "{{ value_json.topartists.artist[4].mbid }}"
+    - unique_id: last_fm_top_artists_06
+      name: Last.fm Top Artists 06
+      icon: fab:lastfm-square
+      value_template: "{{ value_json.topartists.artist[5].name }}"
+      attributes:
+        - name: Artist Name
+          value_template: "{{ value_json.topartists.artist[5].name }}"
+        - name: Play Count
+          value_template: "{{ value_json.topartists.artist[5].playcount }}"
+        - name: Art
+          value_template: "{{ value_json.topartists.artist[5].image[3]['#text'] }}"
+        - name: MBID
+          value_template: "{{ value_json.topartists.artist[5].mbid }}"
+    - unique_id: last_fm_top_artists_07
+      name: Last.fm Top Artists 07
+      icon: fab:lastfm-square
+      value_template: "{{ value_json.topartists.artist[6].name }}"
+      attributes:
+        - name: Artist Name
+          value_template: "{{ value_json.topartists.artist[6].name }}"
+        - name: Play Count
+          value_template: "{{ value_json.topartists.artist[6].playcount }}"
+        - name: Art
+          value_template: "{{ value_json.topartists.artist[6].image[3]['#text'] }}"
+        - name: MBID
+          value_template: "{{ value_json.topartists.artist[6].mbid }}"
+    - unique_id: last_fm_top_artists_08
+      name: Last.fm Top Artists 08
+      icon: fab:lastfm-square
+      value_template: "{{ value_json.topartists.artist[7].name }}"
+      attributes:
+        - name: Artist Name
+          value_template: "{{ value_json.topartists.artist[7].name }}"
+        - name: Play Count
+          value_template: "{{ value_json.topartists.artist[7].playcount }}"
+        - name: Art
+          value_template: "{{ value_json.topartists.artist[7].image[3]['#text'] }}"
+        - name: MBID
+          value_template: "{{ value_json.topartists.artist[7].mbid }}"
+    - unique_id: last_fm_top_artists_09
+      name: Last.fm Top Artists 09
+      icon: fab:lastfm-square
+      value_template: "{{ value_json.topartists.artist[8].name }}"
+      attributes:
+        - name: Artist Name
+          value_template: "{{ value_json.topartists.artist[8].name }}"
+        - name: Play Count
+          value_template: "{{ value_json.topartists.artist[8].playcount }}"
+        - name: Art
+          value_template: "{{ value_json.topartists.artist[8].image[3]['#text'] }}"
+        - name: MBID
+          value_template: "{{ value_json.topartists.artist[8].mbid }}"
+    - unique_id: last_fm_top_artists_10
+      name: Last.fm Top Artists 10
+      icon: fab:lastfm-square
+      value_template: "{{ value_json.topartists.artist[9].name }}"
+      attributes:
+        - name: Artist Name
+          value_template: "{{ value_json.topartists.artist[9].name }}"
+        - name: Play Count
+          value_template: "{{ value_json.topartists.artist[9].playcount }}"
+        - name: Art
+          value_template: "{{ value_json.topartists.artist[9].image[3]['#text'] }}"
+        - name: MBID
+          value_template: "{{ value_json.topartists.artist[9].mbid }}"
+
+
+
+

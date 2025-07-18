@@ -1,0 +1,107 @@
+- platform: rest
+  name: Reddit Profile (xpucu)
+  resource: https://reddit.com/user/xpucu/about.json
+  value_template: "{{ value_json.data.total_karma | int }}"
+  unit_of_measurement: "karma"
+  json_attributes_path: "$.data"
+  json_attributes:
+    - total_karma
+    - link_karma
+    - comment_karma
+
+
+- platform: rest
+  name: ISP In Use
+  scan_interval: 600
+  resource: http://ip-api.com/json/?fields=isp
+  value_template: '{{ value_json.isp }}'
+
+- platform: rest
+  resource: !secret az511_url
+  name: AZDOT Latest Alert 2
+  method: GET
+  scan_interval: 300
+  value_template: >
+    {% set alerts = value_json %}
+    {% if alerts | count == 0 %}
+      none
+    {% else %}
+      {% set latest = alerts | sort(attribute='StartTime', reverse=true) | first %}
+      {{ latest.Message }}
+    {% endif %}
+  json_attributes_path: "$[0]"
+  json_attributes:
+    - Message
+    - Notes
+    - StartTime
+    - EndTime
+    - Regions
+    - HighImportance
+    - SendNotification
+
+- platform: rest
+  name: Last.fm Top Artists JSON
+  resource: !secret last_fm_api_url_top_artists
+  value_template: "{{ now().isoformat() }}"  # or any dummy value
+  json_attributes_path: $.topartists
+  json_attributes:
+    - artist
+  scan_interval: 3600
+
+- platform: rest
+  name: Last.fm Top Albums JSON
+  resource: !secret last_fm_api_url_top_albums
+  value_template: "{{ now().isoformat() }}"  # or any dummy value
+  json_attributes_path: $.topalbums
+  json_attributes:
+    - album
+  scan_interval: 3600
+
+- platform: rest
+  name: nws_gridpoint_forecast
+  resource: https://api.weather.gov/gridpoints/PSR/159,38
+  scan_interval: 300
+  value_template: >
+    {% set w = value_json.weather[0] if value_json.weather and value_json[0] is defined else {} %}
+    {{ [w.coverage, w.intensity, w.weather] | select('string') | join(' ') | title }}
+  json_attributes_path: "$.properties"
+  json_attributes:
+    - temperature
+    - dewpoint
+    - maxTemperature
+    - minTemperature
+    - relativeHumidity
+    - apparentTemperature
+    - wetBulbGlobeTemperature
+    - heatIndex
+    - windChill
+    - skyCover
+    - windDirection
+    - windSpeed
+    - windGust
+    - weather
+    - hazards
+    - probabilityOfPrecipitation
+    - quantitativePrecipitation
+    - iceAccumulation
+    - snowfallAmount
+    - snowLevel
+    - ceilingHeight
+    - visibility
+    - transportWindSpeed
+    - transportWindDirection
+    - mixingHeight
+    - hainesIndex
+    - twentyFootWindSpeed
+    - twentyFootWindDirection
+    - redFlagThreatIndex
+    - lightningActivityLevel
+
+- resource: https://api.weather.gov/gridpoints/PSR/159,38/forecast/hourly?units=us
+  platform: rest
+  scan_interval: 300
+  name: nws_hourly_forecast
+  value_template: "{{ value_json.current.weather[0].description }}"
+  json_attributes_path: "$.properties"
+  json_attributes:
+    - periods
