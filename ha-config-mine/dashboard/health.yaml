@@ -1,0 +1,2365 @@
+button_card_templates:
+  pollen_base:
+    show_icon: false
+    show_name: true
+    show_state: false
+    styles:
+      card:
+        - border-radius: 16px
+        - padding: 16px
+        - min-height: 160px
+        - position: relative
+        - overflow: hidden
+        - box-shadow: 0 2px 8px rgba(0,0,0,0.08)
+        - background: var(--card-background-color)
+      name:
+        - font-size: 16px
+        - font-weight: 600
+        - color: var(--primary-text-color)
+        - position: absolute
+        - top: 12px
+        - left: 70px
+      custom_fields:
+        category:
+          - font-size: 13px
+          - position: absolute
+          - top: 36px
+          - left: 70px
+          - font-weight: 600
+        description:
+          - font-size: 11px
+          - position: absolute
+          - top: 58px
+          - left: 70px
+          - right: 70px
+          - font-weight: 400
+          - color: var(--secondary-text-color)
+          - line-height: 1.4
+          - white-space: normal
+          - word-wrap: break-word
+        badge:
+          - position: absolute
+          - left: 0
+          - top: 0
+          - bottom: 0
+          - width: 55px
+          - border-radius: 16px 0 0 16px
+          - display: flex
+          - align-items: center
+          - justify-content: center
+        plant_img:
+          - position: absolute
+          - right: 12px
+          - top: 12px
+          - width: 50px
+          - height: 50px
+  pollen_tree:
+    template: pollen_base
+    custom_fields:
+      badge: |
+        [[[
+          const colorHex = states[entity.entity_id]?.attributes?.color_hex || '#B0BEC5';
+          return `<div style="width:100%;height:100%;background:${colorHex};display:flex;align-items:center;justify-content:center;">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="white" opacity="0.9">
+              <circle cx="8" cy="7" r="1.8"/><circle cx="12" cy="5" r="1.3"/><circle cx="16" cy="7" r="1.8"/>
+              <circle cx="6" cy="11" r="1.3"/><circle cx="18" cy="11" r="1.3"/>
+              <circle cx="10" cy="14" r="1.5"/><circle cx="14" cy="14" r="1.5"/>
+              <path d="M12 12 L12 20" stroke="white" stroke-width="1.5"/>
+            </svg>
+          </div>`;
+        ]]]
+      plant_img: |
+        [[[
+          const category = states[entity.entity_id]?.attributes?.category?.toLowerCase().replace(' ', '_') || 'none';
+          const levelMap = {
+            'none': 'none', 'very_low': 'very_low', 'low': 'low',
+            'medium': 'medium', 'moderate': 'medium', 'high': 'high', 'very_high': 'very_high'
+          };
+          const level = levelMap[category] || 'none';
+          return `<img src="/local/pollen/pollen_tree_${level}.svg" style="width:50px;height:50px;">`;
+        ]]]
+      category: |
+        [[[
+          const category = states[entity.entity_id]?.attributes?.category || 'None';
+          const colorHex = states[entity.entity_id]?.attributes?.color_hex || '#B0BEC5';
+          return `<span style="color:${colorHex}">${category}</span>`;
+        ]]]
+      description: |
+        [[[
+          const desc = states[entity.entity_id]?.attributes?.description || '';
+          const advice = states[entity.entity_id]?.attributes?.advice || '';
+          const text = desc + (advice ? ' ' + advice : '');
+          return `<span>${text}</span>`;
+        ]]]
+  pollen_grass:
+    template: pollen_base
+    custom_fields:
+      badge: |
+        [[[
+          const colorHex = states[entity.entity_id]?.attributes?.color_hex || '#B0BEC5';
+          return `<div style="width:100%;height:100%;background:${colorHex};display:flex;align-items:center;justify-content:center;">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="white" opacity="0.9">
+              <circle cx="8" cy="7" r="1.8"/><circle cx="12" cy="5" r="1.3"/><circle cx="16" cy="7" r="1.8"/>
+              <circle cx="6" cy="11" r="1.3"/><circle cx="18" cy="11" r="1.3"/>
+              <circle cx="10" cy="14" r="1.5"/><circle cx="14" cy="14" r="1.5"/>
+              <path d="M12 12 L12 20" stroke="white" stroke-width="1.5"/>
+            </svg>
+          </div>`;
+        ]]]
+      plant_img: |
+        [[[
+          const category = states[entity.entity_id]?.attributes?.category?.toLowerCase().replace(' ', '_') || 'none';
+          const levelMap = {
+            'none': 'none', 'very_low': 'very_low', 'low': 'low',
+            'medium': 'medium', 'moderate': 'medium', 'high': 'high', 'very_high': 'very_high'
+          };
+          const level = levelMap[category] || 'none';
+          return `<img src="/local/pollen/pollen_grass_${level}.svg" style="width:50px;height:50px;">`;
+        ]]]
+      category: |
+        [[[
+          const category = states[entity.entity_id]?.attributes?.category || 'None';
+          const colorHex = states[entity.entity_id]?.attributes?.color_hex || '#B0BEC5';
+          return `<span style="color:${colorHex}">${category}</span>`;
+        ]]]
+      description: |
+        [[[
+          const desc = states[entity.entity_id]?.attributes?.description || '';
+          const advice = states[entity.entity_id]?.attributes?.advice || '';
+          const text = desc + (advice ? ' ' + advice : '');
+          return `<span>${text}</span>`;
+        ]]]
+  pollen_weed:
+    template: pollen_base
+    custom_fields:
+      badge: |
+        [[[
+          const colorHex = states[entity.entity_id]?.attributes?.color_hex || '#B0BEC5';
+          return `<div style="width:100%;height:100%;background:${colorHex};display:flex;align-items:center;justify-content:center;">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="white" opacity="0.9">
+              <circle cx="8" cy="7" r="1.8"/><circle cx="12" cy="5" r="1.3"/><circle cx="16" cy="7" r="1.8"/>
+              <circle cx="6" cy="11" r="1.3"/><circle cx="18" cy="11" r="1.3"/>
+              <circle cx="10" cy="14" r="1.5"/><circle cx="14" cy="14" r="1.5"/>
+              <path d="M12 12 L12 20" stroke="white" stroke-width="1.5"/>
+            </svg>
+          </div>`;
+        ]]]
+      plant_img: |
+        [[[
+          const category = states[entity.entity_id]?.attributes?.category?.toLowerCase().replace(' ', '_') || 'none';
+          const levelMap = {
+            'none': 'none', 'very_low': 'very_low', 'low': 'low',
+            'medium': 'medium', 'moderate': 'medium', 'high': 'high', 'very_high': 'very_high'
+          };
+          const level = levelMap[category] || 'none';
+          return `<img src="/local/pollen/pollen_weed_${level}.svg" style="width:50px;height:50px;">`;
+        ]]]
+      category: |
+        [[[
+          const category = states[entity.entity_id]?.attributes?.category || 'None';
+          const colorHex = states[entity.entity_id]?.attributes?.color_hex || '#B0BEC5';
+          return `<span style="color:${colorHex}">${category}</span>`;
+        ]]]
+      description: |
+        [[[
+          const desc = states[entity.entity_id]?.attributes?.description || '';
+          const advice = states[entity.entity_id]?.attributes?.advice || '';
+          const text = desc + (advice ? ' ' + advice : '');
+          return `<span>${text}</span>`;
+        ]]]
+  pollen_plant:
+    show_icon: false
+    show_name: true
+    show_state: false
+    styles:
+      card:
+        - border-radius: 16px
+        - padding: 16px
+        - min-height: 200px
+        - position: relative
+        - overflow: hidden
+        - box-shadow: 0 2px 8px rgba(0,0,0,0.08)
+        - background: var(--card-background-color)
+      name:
+        - font-size: 16px
+        - font-weight: 600
+        - color: var(--primary-text-color)
+        - position: absolute
+        - top: 12px
+        - left: 70px
+      custom_fields:
+        category:
+          - font-size: 13px
+          - position: absolute
+          - top: 34px
+          - left: 70px
+          - font-weight: 600
+        info:
+          - font-size: 11px
+          - position: absolute
+          - top: 54px
+          - left: 70px
+          - right: 80px
+          - color: var(--secondary-text-color)
+          - line-height: 1.5
+        description:
+          - font-size: 11px
+          - position: absolute
+          - top: 100px
+          - left: 70px
+          - right: 16px
+          - font-weight: 400
+          - color: var(--secondary-text-color)
+          - line-height: 1.4
+          - white-space: normal
+          - word-wrap: break-word
+        cross_reaction:
+          - font-size: 10px
+          - position: absolute
+          - bottom: 12px
+          - left: 70px
+          - right: 16px
+          - color: var(--secondary-text-color)
+          - line-height: 1.3
+          - white-space: normal
+          - word-wrap: break-word
+          - font-style: italic
+        badge:
+          - position: absolute
+          - left: 0
+          - top: 0
+          - bottom: 0
+          - width: 55px
+          - border-radius: 16px 0 0 16px
+          - display: flex
+          - align-items: center
+          - justify-content: center
+        plant_img:
+          - position: absolute
+          - right: 12px
+          - top: 12px
+          - width: 60px
+          - height: 60px
+          - border-radius: 8px
+          - overflow: hidden
+    custom_fields:
+      badge: |
+        [[[
+          const colorHex = states[entity.entity_id]?.attributes?.color_hex || '#B0BEC5';
+          const icon = states[entity.entity_id]?.attributes?.icon || 'mdi:flower';
+          return `<div style="width:100%;height:100%;background:${colorHex};display:flex;align-items:center;justify-content:center;">
+            <ha-icon icon="${icon}" style="color:white;--mdc-icon-size:26px;opacity:0.9;"></ha-icon>
+          </div>`;
+        ]]]
+      plant_img: |
+        [[[
+          const picture = states[entity.entity_id]?.attributes?.picture_closeup || states[entity.entity_id]?.attributes?.picture || '';
+          if (picture) {
+            return `<img src="${picture}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">`;
+          }
+          return '';
+        ]]]
+      category: |
+        [[[
+          const category = states[entity.entity_id]?.attributes?.category || 'None';
+          const colorHex = states[entity.entity_id]?.attributes?.color_hex || '#B0BEC5';
+          return `<span style="color:${colorHex}">${category}</span>`;
+        ]]]
+      info: |
+        [[[
+          const code = states[entity.entity_id]?.attributes?.code || '';
+          const family = states[entity.entity_id]?.attributes?.family || '';
+          const season = states[entity.entity_id]?.attributes?.season || '';
+          let info = '';
+          if (code) info += `<span style="font-weight:500;">${code}</span>`;
+          if (family) info += `${code ? ' · ' : ''}<span>${family}</span>`;
+          if (season) info += `<br><span style="opacity:0.8;">Season: ${season}</span>`;
+          return info;
+        ]]]
+      description: |
+        [[[
+          const desc = states[entity.entity_id]?.attributes?.description || '';
+          return `<span>${desc}</span>`;
+        ]]]
+      cross_reaction: |
+        [[[
+          const cross = states[entity.entity_id]?.attributes?.cross_reaction || '';
+          if (cross) {
+            return `<span>⚠️ Cross-reaction: ${cross}</span>`;
+          }
+          return '';
+        ]]]
+title: Testing
+icon: mdi:robot
+views:
+  - type: sections
+    max_columns: 4
+    title: test2
+    path: test
+    sections:
+      - type: grid
+        cards:
+          - type: custom:button-card
+            show_icon: false
+            show_name: false
+            show_state: false
+            styles:
+              card:
+                - border-radius: 16px
+                - padding: 0
+                - min-height: 200px
+                - position: relative
+                - overflow: hidden
+                - box-shadow: 0 2px 8px rgba(0,0,0,0.08)
+                - background: linear-gradient(135deg,
+              custom_fields:
+                content:
+                  - position: relative
+                  - width: 100%
+            custom_fields:
+              content: |
+                [[[
+                  const forecasted = states['sensor.allergy_index_forecasted_average'];
+                  const tomorrow = states['sensor.allergy_index_tomorrow'];
+                  
+                  const outlook = forecasted?.attributes?.outlook || '';
+                  const rating = forecasted?.attributes?.rating || 'Unknown';
+                  const trend = forecasted?.attributes?.trend || '';
+                  const season = forecasted?.attributes?.season || '';
+                  const city = forecasted?.attributes?.city || '';
+                  const st = forecasted?.attributes?.state || '';
+                  
+                  const todayValue = forecasted?.state || '--';
+                  const tomorrowValue = tomorrow?.state || '--';
+                  
+                  const allergen1 = tomorrow?.attributes?.allergen_name_1 || '';
+                  const allergenType1 = tomorrow?.attributes?.allergen_type_1 || '';
+                  
+                  const ratingColorMap = {
+                    'Low': '#A5D6A7',
+                    'Low/Medium': '#C5E1A5',
+                    'Medium': '#FFE082',
+                    'Medium/High': '#FFCC80',
+                    'High': '#FFAB91',
+                    'Very High': '#EF9A9A'
+                  };
+                  const ratingColor = ratingColorMap[rating] || '#B0BEC5';
+                  
+                  const trendIcon = trend === 'Increasing' ? '↑' : trend === 'Decreasing' ? '↓' : '→';
+                  const trendColor = trend === 'Increasing' ? '#FFAB91' : trend === 'Decreasing' ? '#A5D6A7' : '#B0BEC5';
+                  
+                  return `
+                    <div style="padding: 20px 24px;">
+                      <!-- Outlook -->
+                      <div style="
+                        font-size: 16px;
+                        font-weight: 500;
+                        color: rgba(255,255,255,0.9);
+                        line-height: 1.5;
+                        margin-bottom: 20px;
+                        white-space: normal;
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
+                      ">${outlook}</div>
+                      
+                      <!-- Divider -->
+                      <div style="
+                        height: 1px;
+                        background: rgba(255,255,255,0.15);
+                        margin-bottom: 16px;
+                      "></div>
+                      
+                      <!-- Bottom section -->
+                      <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                      ">
+                        <!-- Left side -->
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                          <!-- Title row -->
+                          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span style="font-size: 22px; font-weight: 600; color: white;">Pollen</span>
+                            <span style="
+                              font-size: 11px;
+                              font-weight: 500;
+                              color: ${ratingColor};
+                              background: rgba(255,255,255,0.15);
+                              padding: 4px 10px;
+                              border-radius: 12px;
+                            ">${rating}</span>
+                            <span style="font-size: 13px; color: ${trendColor};">${trendIcon} ${trend}</span>
+                          </div>
+                          
+                          <!-- Info row -->
+                          <div style="display: flex; gap: 14px; font-size: 11px; color: rgba(255,255,255,0.7); flex-wrap: wrap;">
+                            <span>📍 ${city}, ${st}</span>
+                            <span>🌳 ${season} Season</span>
+                            ${allergen1 ? `<span>⚠️ ${allergen1} (${allergenType1})</span>` : ''}
+                          </div>
+                        </div>
+                        
+                        <!-- Right side - values -->
+                        <div style="display: flex; gap: 16px; align-items: center;">
+                          <div style="text-align: center;">
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 2px;">Today</div>
+                            <div style="font-size: 18px; font-weight: 600; color: white;">${todayValue}</div>
+                          </div>
+                          <div style="text-align: center;">
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 2px;">Tomorrow</div>
+                            <div style="font-size: 18px; font-weight: 600; color: white;">${tomorrowValue}</div>
+                          </div>
+                          <div style="
+                            width: 40px;
+                            height: 40px;
+                            background: rgba(255,255,255,0.15);
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            flex-shrink: 0;
+                          ">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="rgba(255,255,255,0.9)">
+                              <circle cx="12" cy="12" r="3"/>
+                              <circle cx="12" cy="5" r="2"/>
+                              <circle cx="12" cy="19" r="2"/>
+                              <circle cx="5" cy="12" r="2"/>
+                              <circle cx="19" cy="12" r="2"/>
+                              <circle cx="7" cy="7" r="1.5"/>
+                              <circle cx="17" cy="7" r="1.5"/>
+                              <circle cx="7" cy="17" r="1.5"/>
+                              <circle cx="17" cy="17" r="1.5"/>
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                ]]]
+          - type: custom:button-card
+            template: pollen_grass
+            entity: sensor.pollen_types_33_670881_112_021118_grass
+            name: Grass Pollen Index
+          - type: custom:button-card
+            template: pollen_weed
+            entity: sensor.pollen_types_33_670881_112_021118_weed
+            name: Weed Pollen Index
+          - type: custom:button-card
+            template: pollen_tree
+            entity: sensor.pollen_types_33_670881_112_021118_tree
+            name: Tree Pollen Index
+      - type: grid
+        cards:
+          - type: custom:button-card
+            show_icon: false
+            show_name: false
+            show_state: false
+            styles:
+              card:
+                - border-radius: 16px
+                - padding: 0
+                - min-height: 120px
+                - position: relative
+                - overflow: hidden
+                - box-shadow: 0 2px 8px rgba(0,0,0,0.08)
+                - background: linear-gradient(135deg,
+              custom_fields:
+                content:
+                  - position: relative
+                  - width: 100%
+            custom_fields:
+              content: |
+                [[[
+                  const plants = [
+                    { id: 'sensor.plants_33_670881_112_021118_grasses', name: 'Grasses' },
+                    { id: 'sensor.plants_33_670881_112_021118_ragweed', name: 'Ragweed' },
+                    { id: 'sensor.plants_33_670881_112_021118_juniper', name: 'Juniper' },
+                    { id: 'sensor.plants_33_670881_112_021118_ash', name: 'Ash' },
+                    { id: 'sensor.plants_33_670881_112_021118_birch', name: 'Birch' },
+                    { id: 'sensor.plants_33_670881_112_021118_cottonwood', name: 'Cottonwood' },
+                    { id: 'sensor.plants_33_670881_112_021118_elm', name: 'Elm' },
+                    { id: 'sensor.plants_33_670881_112_021118_maple', name: 'Maple' },
+                    { id: 'sensor.plants_33_670881_112_021118_pine', name: 'Pine' },
+                    { id: 'sensor.plants_33_670881_112_021118_alder', name: 'Alder' },
+                    { id: 'sensor.plants_33_670881_112_021118_oak', name: 'Oak' }
+                  ];
+                  
+                  const activePlants = plants.filter(p => {
+                    const s = states[p.id];
+                    return s && s.state !== 'unknown' && s.state !== 'unavailable';
+                  }).map(p => {
+                    const s = states[p.id];
+                    // Metro Red themed colors
+                    const categoryColorMap = {
+                      'Very High': '#D32F2F',
+                      'High': '#FF6F00',
+                      'Medium': '#FFC107',
+                      'Moderate': '#FFC107',
+                      'Low': '#66BB6A',
+                      'Very Low': '#4CAF50',
+                      'None': '#B0BEC5'
+                    };
+                    const category = s.attributes?.category || 'Unknown';
+                    const color = categoryColorMap[category] || s.attributes?.color_hex || '#B0BEC5';
+                    
+                    return {
+                      name: p.name,
+                      category: category,
+                      color: color,
+                      family: s.attributes?.family || '',
+                      season: s.attributes?.season || '',
+                      code: s.attributes?.code || '',
+                      description: s.attributes?.description || '',
+                      cross: s.attributes?.cross_reaction || '',
+                      picture: s.attributes?.picture_closeup || s.attributes?.picture || '',
+                      icon: s.attributes?.icon || 'mdi:flower'
+                    };
+                  });
+                  
+                  // Sort by severity
+                  const severityOrder = { 'Very High': 0, 'High': 1, 'Medium': 2, 'Moderate': 2, 'Low': 3, 'Very Low': 4, 'None': 5 };
+                  activePlants.sort((a, b) => (severityOrder[a.category] ?? 6) - (severityOrder[b.category] ?? 6));
+                  
+                  if (activePlants.length === 0) {
+                    return `
+                      <div style="padding: 24px; text-align: center;">
+                        <div style="font-size: 20px; font-weight: 600; color: rgba(255,255,255,0.95); margin-bottom: 8px;">Active Allergens</div>
+                        <div style="font-size: 14px; color: rgba(255,255,255,0.5);">🌿 No active plant allergens detected</div>
+                      </div>
+                    `;
+                  }
+                  
+                  let plantsHtml = activePlants.map(p => `
+                    <div style="
+                      display: flex;
+                      gap: 16px;
+                      padding: 16px;
+                      background: rgba(255,255,255,0.03);
+                      border-radius: 12px;
+                      border-left: 4px solid ${p.color};
+                    ">
+                      <!-- Left: Photo -->
+                      ${p.picture ? `
+                        <img src="${p.picture}" style="width: 70px; height: 70px; border-radius: 10px; object-fit: cover; flex-shrink: 0; border: 2px solid ${p.color}40;">
+                      ` : `
+                        <div style="
+                          width: 70px;
+                          height: 70px;
+                          background: ${p.color}15;
+                          border-radius: 10px;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          flex-shrink: 0;
+                          border: 2px solid ${p.color}40;
+                        ">
+                          <ha-icon icon="${p.icon}" style="color: ${p.color}; --mdc-icon-size: 36px;"></ha-icon>
+                        </div>
+                      `}
+                      
+                      <!-- Right: Info -->
+                      <div style="flex: 1; min-width: 0;">
+                        <!-- Name and category -->
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px;">
+                          <span style="font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.95);">${p.name}</span>
+                          <span style="
+                            font-size: 11px;
+                            font-weight: 600;
+                            color: ${p.color};
+                            background: ${p.color}20;
+                            padding: 3px 10px;
+                            border-radius: 10px;
+                            border: 1px solid ${p.color}40;
+                          ">${p.category}</span>
+                        </div>
+                        
+                        <!-- Code, Family, Season -->
+                        <div style="font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 8px; line-height: 1.5;">
+                          ${p.code ? `<span style="font-weight: 500;">${p.code}</span>` : ''}
+                          ${p.code && p.family ? ' · ' : ''}
+                          ${p.family ? `<span>${p.family}</span>` : ''}
+                          ${p.season ? `<br><span style="color: rgba(255,255,255,0.4);">Season: ${p.season}</span>` : ''}
+                        </div>
+                        
+                        <!-- Description -->
+                        ${p.description ? `
+                          <div style="
+                            font-size: 12px;
+                            color: rgba(255,255,255,0.7);
+                            line-height: 1.5;
+                            margin-bottom: 8px;
+                            white-space: normal;
+                            word-wrap: break-word;
+                          ">${p.description}</div>
+                        ` : ''}
+                        
+                        <!-- Cross-reaction -->
+                        ${p.cross ? `
+                          <div style="
+                            font-size: 11px;
+                            color: #FFC107;
+                            background: rgba(255, 193, 7, 0.1);
+                            padding: 6px 10px;
+                            border-radius: 6px;
+                            line-height: 1.4;
+                            white-space: normal;
+                            word-wrap: break-word;
+                            border: 1px solid rgba(255, 193, 7, 0.3);
+                          ">⚠️ Cross-reaction: ${p.cross}</div>
+                        ` : ''}
+                      </div>
+                    </div>
+                  `).join('');
+                  
+                  return `
+                    <div style="padding: 20px 24px;">
+                      <!-- Header -->
+                      <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 20px;
+                      ">
+                        <div style="display: flex; align-items: center; gap: 14px;">
+                          <div style="
+                            width: 50px;
+                            height: 50px;
+                            background: rgba(129, 199, 132, 0.15);
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            border: 2px solid rgba(129, 199, 132, 0.3);
+                          ">
+                            <svg viewBox="0 0 24 24" width="28" height="28" fill="#81C784">
+                              <path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"/>
+                            </svg>
+                          </div>
+                          <div>
+                            <div style="font-size: 20px; font-weight: 600; color: rgba(255,255,255,0.95);">Active Allergens</div>
+                            <div style="font-size: 12px; color: rgba(255,255,255,0.4);">${activePlants.length} plant${activePlants.length !== 1 ? 's' : ''} currently active in your area</div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Plants list -->
+                      <div style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: 12px;
+                      ">
+                        ${plantsHtml}
+                      </div>
+                    </div>
+                  `;
+                ]]]
+          - type: custom:button-card
+            show_icon: false
+            show_name: false
+            show_state: false
+            styles:
+              card:
+                - border-radius: 16px
+                - padding: 0
+                - min-height: 200px
+                - position: relative
+                - overflow: hidden
+                - box-shadow: 0 2px 8px rgba(0,0,0,0.08)
+                - background: linear-gradient(135deg,
+              custom_fields:
+                content:
+                  - position: relative
+                  - width: 100%
+            custom_fields:
+              content: |
+                [[[
+                  const forecasted = states['sensor.asthma_index_forecasted_average'];
+                  const tomorrow = states['sensor.asthma_index_tomorrow'];
+                  
+                  const rating = forecasted?.attributes?.rating || 'Unknown';
+                  const trend = forecasted?.attributes?.trend || '';
+                  const city = forecasted?.attributes?.city || '';
+                  const st = forecasted?.attributes?.state || '';
+                  
+                  const forecastedValue = forecasted?.state || '--';
+                  const tomorrowValue = tomorrow?.state || '--';
+                  
+                  const pm25 = tomorrow?.attributes?.allergen_amount_1 || '--';
+                  const pm10 = tomorrow?.attributes?.allergen_amount_2 || '--';
+                  const ozone = tomorrow?.attributes?.allergen_amount_3 || '--';
+                  
+                  const ratingColorMap = {
+                    'Low': '#A5D6A7',
+                    'Low/Medium': '#C5E1A5',
+                    'Medium': '#FFE082',
+                    'Medium/High': '#FFCC80',
+                    'High': '#FFAB91',
+                    'Very High': '#EF9A9A'
+                  };
+                  const ratingColor = ratingColorMap[rating] || '#B0BEC5';
+                  
+                  const trendIcon = trend === 'Increasing' ? '↑' : trend === 'Subsiding' ? '↓' : trend === 'Decreasing' ? '↓' : '→';
+                  const trendColor = trend === 'Increasing' ? '#FFAB91' : (trend === 'Subsiding' || trend === 'Decreasing') ? '#A5D6A7' : '#B0BEC5';
+                  
+                  // Air quality assessment based on PM2.5
+                  let aqMessage = '';
+                  const pm25Val = parseFloat(pm25);
+                  if (pm25Val <= 12) {
+                    aqMessage = 'Air quality is good. Safe for outdoor activities.';
+                  } else if (pm25Val <= 35) {
+                    aqMessage = 'Air quality is moderate. Sensitive individuals should consider limiting prolonged outdoor exertion.';
+                  } else if (pm25Val <= 55) {
+                    aqMessage = 'Air quality is unhealthy for sensitive groups. Consider reducing outdoor activities.';
+                  } else if (pm25Val <= 150) {
+                    aqMessage = 'Air quality is unhealthy. Limit outdoor activities and keep rescue inhaler nearby.';
+                  } else {
+                    aqMessage = 'Air quality is very unhealthy. Avoid outdoor activities. Stay indoors if possible.';
+                  }
+                  
+                  return `
+                    <div style="padding: 20px 24px;">
+                      <!-- Air quality indicators -->
+                      <div style="
+                        display: flex;
+                        gap: 16px;
+                        margin-bottom: 20px;
+                        flex-wrap: wrap;
+                      ">
+                        <div style="
+                          flex: 1;
+                          min-width: 80px;
+                          text-align: center;
+                          padding: 12px;
+                          background: rgba(255,255,255,0.05);
+                          border-radius: 10px;
+                        ">
+                          <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 4px;">PM2.5</div>
+                          <div style="font-size: 20px; font-weight: 600; color: ${pm25Val <= 12 ? '#A5D6A7' : pm25Val <= 35 ? '#C5E1A5' : pm25Val <= 55 ? '#FFE082' : '#FFAB91'};">${pm25}</div>
+                          <div style="font-size: 9px; color: rgba(255,255,255,0.4);">μg/m³</div>
+                        </div>
+                        <div style="
+                          flex: 1;
+                          min-width: 80px;
+                          text-align: center;
+                          padding: 12px;
+                          background: rgba(255,255,255,0.05);
+                          border-radius: 10px;
+                        ">
+                          <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 4px;">PM10</div>
+                          <div style="font-size: 20px; font-weight: 600; color: #80DEEA;">${pm10}</div>
+                          <div style="font-size: 9px; color: rgba(255,255,255,0.4);">μg/m³</div>
+                        </div>
+                        <div style="
+                          flex: 1;
+                          min-width: 80px;
+                          text-align: center;
+                          padding: 12px;
+                          background: rgba(255,255,255,0.05);
+                          border-radius: 10px;
+                        ">
+                          <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 4px;">Ozone</div>
+                          <div style="font-size: 20px; font-weight: 600; color: #B2DFDB;">${ozone}</div>
+                          <div style="font-size: 9px; color: rgba(255,255,255,0.4);">ppb</div>
+                        </div>
+                      </div>
+                      
+                      <!-- Message -->
+                      <div style="
+                        font-size: 14px;
+                        color: rgba(255,255,255,0.85);
+                        line-height: 1.5;
+                        margin-bottom: 16px;
+                        white-space: normal;
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
+                      ">🫁 ${aqMessage}</div>
+                      
+                      <!-- Divider -->
+                      <div style="
+                        height: 1px;
+                        background: rgba(255,255,255,0.15);
+                        margin-bottom: 16px;
+                      "></div>
+                      
+                      <!-- Bottom section -->
+                      <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                      ">
+                        <!-- Left side -->
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                          <!-- Title row -->
+                          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span style="font-size: 22px; font-weight: 600; color: white;">Asthma</span>
+                            <span style="
+                              font-size: 11px;
+                              font-weight: 500;
+                              color: ${ratingColor};
+                              background: rgba(255,255,255,0.15);
+                              padding: 4px 10px;
+                              border-radius: 12px;
+                            ">${rating}</span>
+                            <span style="font-size: 13px; color: ${trendColor};">${trendIcon} ${trend}</span>
+                          </div>
+                          
+                          <!-- Info row -->
+                          <div style="display: flex; gap: 14px; font-size: 11px; color: rgba(255,255,255,0.7); flex-wrap: wrap;">
+                            <span>📍 ${city}, ${st}</span>
+                          </div>
+                        </div>
+                        
+                        <!-- Right side - values -->
+                        <div style="display: flex; gap: 16px; align-items: center;">
+                          <div style="text-align: center;">
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 2px;">Today</div>
+                            <div style="font-size: 18px; font-weight: 600; color: white;">${forecastedValue}</div>
+                          </div>
+                          <div style="text-align: center;">
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 2px;">Tomorrow</div>
+                            <div style="font-size: 18px; font-weight: 600; color: white;">${tomorrowValue}</div>
+                          </div>
+                          <div style="
+                            width: 40px;
+                            height: 40px;
+                            background: rgba(255,255,255,0.15);
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            flex-shrink: 0;
+                          ">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="rgba(255,255,255,0.9)">
+                              <path d="M16 12C16 10.9 16.9 10 18 10C19.1 10 20 10.9 20 12C20 13.1 19.1 14 18 14C16.9 14 16 13.1 16 12M10 12C10 10.9 10.9 10 12 10C13.1 10 14 10.9 14 12C14 13.1 13.1 14 12 14C10.9 14 10 13.1 10 12M4 12C4 10.9 4.9 10 6 10C7.1 10 8 10.9 8 12C8 13.1 7.1 14 6 14C4.9 14 4 13.1 4 12M6 16C3.79 16 2 17.79 2 20H10C10 17.79 8.21 16 6 16M12 16C9.79 16 8 17.79 8 20H16C16 17.79 14.21 16 12 16M18 16C15.79 16 14 17.79 14 20H22C22 17.79 20.21 16 18 16M12 4C10.9 4 10 4.9 10 6C10 7.1 10.9 8 12 8C13.1 8 14 7.1 14 6C14 4.9 13.1 4 12 4Z"/>
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                ]]]
+        column_span: 1
+      - type: grid
+        cards:
+          - type: custom:button-card
+            show_icon: false
+            show_name: false
+            show_state: false
+            styles:
+              card:
+                - border-radius: 16px
+                - padding: 0
+                - min-height: 220px
+                - position: relative
+                - overflow: hidden
+                - box-shadow: 0 2px 8px rgba(0,0,0,0.08)
+                - background: linear-gradient(135deg,
+              custom_fields:
+                content:
+                  - position: relative
+                  - width: 100%
+            custom_fields:
+              content: |
+                [[[
+                  const sensor = states['sensor.noaa_space_weather_alerts_feed'];
+                  let entries = sensor?.attributes?.entries || [];
+                  
+                  // Scan all attributes for geomagnetic info
+                  const allAttrs = JSON.stringify(sensor?.attributes || {});
+                  
+                  // Find highest K-index mentioned anywhere
+                  let highestK = 0;
+                  let geoWarningActive = false;
+                  
+                  const kMatches = allAttrs.match(/K-index of (\d+)/g) || [];
+                  kMatches.forEach(match => {
+                    const k = parseInt(match.replace('K-index of ', ''));
+                    if (k > highestK) highestK = k;
+                  });
+                  
+                  // Check for active warnings
+                  if (allAttrs.includes('WARNING') || allAttrs.includes('ALERT')) {
+                    geoWarningActive = true;
+                  }
+                  
+                  // Find X-ray class
+                  let xrayClass = '';
+                  let noaaScale = '';
+                  const xrayMatch = allAttrs.match(/X-ray Class: ([A-Z]\d+\.?\d*)/);
+                  if (xrayMatch) xrayClass = xrayMatch[1];
+                  
+                  const scaleMatch = allAttrs.match(/NOAA Scale: ([^"\\,\n]+)/);
+                  if (scaleMatch) noaaScale = scaleMatch[1].trim();
+                  
+                  // Find latest issue datetime - try multiple patterns
+                  let latestGeoTime = '';
+                  
+                  // Try to extract from entries array if it exists
+                  if (Array.isArray(entries) && entries.length > 0 && entries[0]?.issue_datetime) {
+                    latestGeoTime = entries[0].issue_datetime;
+                  } else {
+                    // Try regex patterns
+                    const datePatterns = [
+                      /issue_datetime["']?\s*:\s*["']?(\d{4}-\d{2}-\d{2}[T\s]\d{2}:\d{2})/,
+                      /Issue Time:\s*(\d{4}\s+\w+\s+\d+\s+\d{4})\s*UTC/,
+                      /(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})/
+                    ];
+                    
+                    for (const pattern of datePatterns) {
+                      const match = allAttrs.match(pattern);
+                      if (match) {
+                        latestGeoTime = match[1];
+                        break;
+                      }
+                    }
+                  }
+                  
+                  // Determine migraine risk based on K-index
+                  let migraineRisk, riskColor, riskMessage;
+                  if (highestK >= 7) {
+                    migraineRisk = 'Severe';
+                    riskColor = '#EF5350';
+                    riskMessage = '⚠️ Strong geomagnetic storm in progress. High migraine risk. Consider preventive medication.';
+                  } else if (highestK >= 5) {
+                    migraineRisk = 'High';
+                    riskColor = '#FFAB91';
+                    riskMessage = 'Geomagnetic storm conditions. Elevated migraine risk. Stay hydrated and rest.';
+                  } else if (highestK >= 4) {
+                    migraineRisk = 'Moderate';
+                    riskColor = '#FFE082';
+                    riskMessage = 'Active geomagnetic conditions. Some people may experience symptoms.';
+                  } else if (highestK >= 3) {
+                    migraineRisk = 'Low';
+                    riskColor = '#C5E1A5';
+                    riskMessage = 'Minor geomagnetic activity. Low migraine risk for most people.';
+                  } else {
+                    migraineRisk = 'Quiet';
+                    riskColor = '#A5D6A7';
+                    riskMessage = 'Geomagnetic conditions are quiet. Minimal impact expected.';
+                  }
+                  
+                  // Format date
+                  const formatDate = (dateStr) => {
+                    if (!dateStr) return '';
+                    try {
+                      // Handle "2025 Dec 01 0459 UTC" format
+                      if (dateStr.match(/^\d{4}\s+\w+\s+\d+\s+\d{4}$/)) {
+                        const parts = dateStr.split(/\s+/);
+                        const year = parts[0];
+                        const month = parts[1];
+                        const day = parts[2];
+                        const time = parts[3];
+                        const hours = time.substring(0, 2);
+                        const mins = time.substring(2, 4);
+                        return `${month} ${day}, ${hours}:${mins} UTC`;
+                      }
+                      // Handle ISO-ish format
+                      const d = new Date(dateStr);
+                      if (!isNaN(d.getTime())) {
+                        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                      }
+                      // Fallback - just return cleaned up string
+                      return dateStr.replace('T', ' ').substring(0, 16);
+                    } catch {
+                      return '';
+                    }
+                  };
+                  
+                  const formattedDate = formatDate(latestGeoTime);
+                  
+                  // Count alerts by checking for product_id occurrences
+                  const alertCount = (allAttrs.match(/product_id/g) || []).length;
+                  
+                  return `
+                    <div style="padding: 20px 24px;">
+                      <!-- Header with K-index -->
+                      <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 16px;
+                        margin-bottom: 16px;
+                      ">
+                        <div style="
+                          width: 70px;
+                          height: 70px;
+                          background: rgba(255,255,255,0.1);
+                          border-radius: 50%;
+                          display: flex;
+                          flex-direction: column;
+                          align-items: center;
+                          justify-content: center;
+                          flex-shrink: 0;
+                          border: 3px solid ${riskColor};
+                        ">
+                          <span style="font-size: 28px; font-weight: 700; color: white; line-height: 1;">K${highestK}</span>
+                          <span style="font-size: 9px; color: rgba(255,255,255,0.6);">index</span>
+                        </div>
+                        <div style="flex: 1;">
+                          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px; flex-wrap: wrap;">
+                            <span style="font-size: 20px; font-weight: 600; color: white;">Space Weather</span>
+                            <span style="
+                              font-size: 10px;
+                              font-weight: 500;
+                              color: ${riskColor};
+                              background: rgba(255,255,255,0.1);
+                              padding: 3px 8px;
+                              border-radius: 10px;
+                            ">${migraineRisk} Risk</span>
+                          </div>
+                          <div style="font-size: 11px; color: rgba(255,255,255,0.6);">
+                            ${geoWarningActive ? '🔴 Active Warning' : '🟢 No Active Warning'} · ${alertCount} alerts
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Risk message -->
+                      <div style="
+                        font-size: 14px;
+                        color: rgba(255,255,255,0.85);
+                        line-height: 1.5;
+                        margin-bottom: 16px;
+                        padding: 12px;
+                        background: rgba(255,255,255,0.05);
+                        border-radius: 8px;
+                        border-left: 3px solid ${riskColor};
+                        white-space: normal;
+                        word-wrap: break-word;
+                      ">🧠 ${riskMessage}</div>
+                      
+                      <!-- Divider -->
+                      <div style="
+                        height: 1px;
+                        background: rgba(255,255,255,0.15);
+                        margin-bottom: 16px;
+                      "></div>
+                      
+                      <!-- Bottom stats -->
+                      <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-start;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                      ">
+                        <!-- Left - Latest alerts -->
+                        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 200px;">
+                          <div style="font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase;">Latest Activity</div>
+                          ${highestK > 0 ? `
+                            <div style="font-size: 12px; color: rgba(255,255,255,0.8);">
+                              🌍 <span style="color: ${riskColor};">K${highestK} Geomagnetic</span>
+                              ${formattedDate ? `<span style="color: rgba(255,255,255,0.5); margin-left: 8px;">${formattedDate}</span>` : ''}
+                            </div>
+                          ` : '<div style="font-size: 12px; color: rgba(255,255,255,0.5);">No geomagnetic alerts</div>'}
+                          ${xrayClass ? `
+                            <div style="font-size: 12px; color: rgba(255,255,255,0.8);">
+                              ☀️ <span style="color: #FFD54F;">${xrayClass} Solar Flare</span>
+                              ${noaaScale ? `<span style="color: rgba(255,255,255,0.5); margin-left: 8px;">${noaaScale}</span>` : ''}
+                            </div>
+                          ` : ''}
+                        </div>
+                        
+                        <!-- Right - K-index scale -->
+                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                          <div style="font-size: 9px; color: rgba(255,255,255,0.4);">K-INDEX SCALE</div>
+                          <div style="display: flex; gap: 3px; align-items: flex-end;">
+                            <div style="width: 10px; height: 12px; background: ${highestK >= 1 ? '#A5D6A7' : 'rgba(255,255,255,0.15)'}; border-radius: 2px;"></div>
+                            <div style="width: 10px; height: 16px; background: ${highestK >= 2 ? '#A5D6A7' : 'rgba(255,255,255,0.15)'}; border-radius: 2px;"></div>
+                            <div style="width: 10px; height: 20px; background: ${highestK >= 3 ? '#C5E1A5' : 'rgba(255,255,255,0.15)'}; border-radius: 2px;"></div>
+                            <div style="width: 10px; height: 24px; background: ${highestK >= 4 ? '#FFE082' : 'rgba(255,255,255,0.15)'}; border-radius: 2px;"></div>
+                            <div style="width: 10px; height: 28px; background: ${highestK >= 5 ? '#FFAB91' : 'rgba(255,255,255,0.15)'}; border-radius: 2px;"></div>
+                            <div style="width: 10px; height: 32px; background: ${highestK >= 6 ? '#FFAB91' : 'rgba(255,255,255,0.15)'}; border-radius: 2px;"></div>
+                            <div style="width: 10px; height: 36px; background: ${highestK >= 7 ? '#EF5350' : 'rgba(255,255,255,0.15)'}; border-radius: 2px;"></div>
+                            <div style="width: 10px; height: 40px; background: ${highestK >= 8 ? '#EF5350' : 'rgba(255,255,255,0.15)'}; border-radius: 2px;"></div>
+                            <div style="width: 10px; height: 44px; background: ${highestK >= 9 ? '#EF5350' : 'rgba(255,255,255,0.15)'}; border-radius: 2px;"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                ]]]
+          - type: custom:button-card
+            show_icon: false
+            show_name: false
+            show_state: false
+            styles:
+              card:
+                - border-radius: 16px
+                - padding: 0
+                - min-height: 240px
+                - position: relative
+                - overflow: hidden
+                - box-shadow: 0 2px 8px rgba(0,0,0,0.08)
+                - background: linear-gradient(135deg,
+              custom_fields:
+                content:
+                  - position: relative
+                  - width: 100%
+            custom_fields:
+              content: |
+                [[[
+                  // Atmospheric Pressure Data
+                  const pressureSensor = states['sensor.netatmo_weather_station_atmospheric_pressure'];
+                  const pressureTrend = states['sensor.netatmo_weather_station_pressure_trend'];
+                  
+                  const pressure = parseFloat(pressureSensor?.state) || 1013.3;
+                  const trend = pressureTrend?.state || 'stable';
+                  
+                  // Space Weather Data
+                  const spaceWeather = states['sensor.noaa_space_weather_alerts_feed'];
+                  const allAttrs = JSON.stringify(spaceWeather?.attributes || {});
+                  
+                  // Find highest K-index
+                  let highestK = 0;
+                  const kMatches = allAttrs.match(/K-index of (\d+)/g) || [];
+                  kMatches.forEach(match => {
+                    const k = parseInt(match.replace('K-index of ', ''));
+                    if (k > highestK) highestK = k;
+                  });
+                  
+                  // ===== PRESSURE RISK ASSESSMENT =====
+                  // Optimal pressure: 1013-1020 hPa
+                  // Risk increases with deviation from optimal range
+                  let pressureRisk, pressureColor, pressureMessage;
+                  
+                  if (pressure < 990) {
+                    pressureRisk = 'Very High';
+                    pressureColor = '#D32F2F';
+                    pressureMessage = 'Extremely low pressure. Very high migraine risk.';
+                  } else if (pressure < 1000) {
+                    pressureRisk = 'High';
+                    pressureColor = '#FF6F00';
+                    pressureMessage = 'Low pressure system. Elevated migraine risk.';
+                  } else if (pressure < 1010) {
+                    pressureRisk = 'Moderate';
+                    pressureColor = '#FFC107';
+                    pressureMessage = 'Below optimal pressure. Moderate migraine risk.';
+                  } else if (pressure <= 1023) {
+                    pressureRisk = 'Low';
+                    pressureColor = '#4CAF50';
+                    pressureMessage = 'Pressure in optimal range. Low migraine risk.';
+                  } else if (pressure <= 1030) {
+                    pressureRisk = 'Moderate';
+                    pressureColor = '#FFC107';
+                    pressureMessage = 'Above optimal pressure. Moderate migraine risk.';
+                  } else {
+                    pressureRisk = 'High';
+                    pressureColor = '#FF6F00';
+                    pressureMessage = 'Very high pressure. Elevated migraine risk.';
+                  }
+                  
+                  // Trend increases risk
+                  let trendRisk = 0;
+                  let trendIcon = '→';
+                  let trendColor = '#B0BEC5';
+                  let trendMessage = '';
+                  
+                  if (trend === 'up') {
+                    trendRisk = 1;
+                    trendIcon = '↑';
+                    trendColor = '#FF9800';
+                    trendMessage = 'Rising pressure can trigger migraines';
+                  } else if (trend === 'down') {
+                    trendRisk = 2;
+                    trendIcon = '↓';
+                    trendColor = '#D32F2F';
+                    trendMessage = 'Falling pressure is a strong migraine trigger';
+                  } else {
+                    trendMessage = 'Stable pressure';
+                  }
+                  
+                  // ===== GEOMAGNETIC RISK ASSESSMENT =====
+                  let geoRisk = 0;
+                  let geoMessage = '';
+                  
+                  if (highestK >= 7) {
+                    geoRisk = 3;
+                    geoMessage = 'Severe geomagnetic storm';
+                  } else if (highestK >= 5) {
+                    geoRisk = 2;
+                    geoMessage = 'Strong geomagnetic activity';
+                  } else if (highestK >= 4) {
+                    geoRisk = 1;
+                    geoMessage = 'Moderate geomagnetic activity';
+                  } else if (highestK >= 3) {
+                    geoRisk = 0.5;
+                    geoMessage = 'Minor geomagnetic activity';
+                  } else {
+                    geoMessage = 'Quiet geomagnetic conditions';
+                  }
+                  
+                  // ===== COMBINED RISK CALCULATION =====
+                  // Pressure deviation from optimal (1013-1020)
+                  const optimalPressure = 1016.5; // Middle of optimal range
+                  const pressureDeviation = Math.abs(pressure - optimalPressure);
+                  
+                  // Calculate combined risk score (0-10)
+                  let riskScore = 0;
+                  
+                  // Pressure deviation component (0-4 points)
+                  if (pressureDeviation > 40) riskScore += 4;
+                  else if (pressureDeviation > 30) riskScore += 3;
+                  else if (pressureDeviation > 20) riskScore += 2;
+                  else if (pressureDeviation > 10) riskScore += 1;
+                  
+                  // Trend component (0-2 points)
+                  riskScore += trendRisk;
+                  
+                  // Geomagnetic component (0-3 points)
+                  riskScore += geoRisk;
+                  
+                  // Overall risk assessment
+                  let overallRisk, overallColor, overallGlow, overallIcon, recommendations;
+                  
+                  if (riskScore >= 7) {
+                    overallRisk = 'Critical';
+                    overallColor = '#B71C1C';
+                    overallGlow = 'rgba(183, 28, 28, 0.4)';
+                    overallIcon = '🔴';
+                    recommendations = 'Take preventive medication now. Avoid triggers. Stay hydrated. Rest in a dark, quiet room.';
+                  } else if (riskScore >= 5) {
+                    overallRisk = 'High';
+                    overallColor = '#D32F2F';
+                    overallGlow = 'rgba(211, 47, 47, 0.3)';
+                    overallIcon = '🟠';
+                    recommendations = 'High risk period. Consider preventive medication. Minimize stress and bright lights.';
+                  } else if (riskScore >= 3) {
+                    overallRisk = 'Moderate';
+                    overallColor = '#FF9800';
+                    overallGlow = 'rgba(255, 152, 0, 0.3)';
+                    overallIcon = '🟡';
+                    recommendations = 'Be cautious. Keep rescue medication handy. Avoid known triggers.';
+                  } else if (riskScore >= 1) {
+                    overallRisk = 'Low';
+                    overallColor = '#FFC107';
+                    overallGlow = 'rgba(255, 193, 7, 0.3)';
+                    overallIcon = '🟢';
+                    recommendations = 'Low risk but stay vigilant. Maintain regular sleep and meal schedule.';
+                  } else {
+                    overallRisk = 'Minimal';
+                    overallColor = '#4CAF50';
+                    overallGlow = 'rgba(76, 175, 80, 0.3)';
+                    overallIcon = '✅';
+                    recommendations = 'Conditions are favorable. Good time for activities.';
+                  }
+                  
+                  // Risk score visualization (0-10 scale)
+                  const riskPercent = Math.min((riskScore / 10) * 100, 100);
+                  
+                  return `
+                    <div style="padding: 20px 24px;">
+                      <!-- Header with risk score -->
+                      <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 18px;
+                        margin-bottom: 16px;
+                      ">
+                        <!-- Risk score circle -->
+                        <div style="
+                          width: 80px;
+                          height: 80px;
+                          background: rgba(255,255,255,0.03);
+                          border-radius: 50%;
+                          display: flex;
+                          flex-direction: column;
+                          align-items: center;
+                          justify-content: center;
+                          flex-shrink: 0;
+                          border: 3px solid ${overallColor};
+                          box-shadow: 0 0 20px ${overallGlow}, inset 0 0 20px ${overallGlow};
+                          position: relative;
+                        ">
+                          <span style="font-size: 32px; font-weight: 700; color: ${overallColor}; line-height: 1; text-shadow: 0 0 10px ${overallGlow};">${riskScore.toFixed(1)}</span>
+                          <span style="font-size: 9px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px;">/ 10</span>
+                        </div>
+                        
+                        <!-- Title and status -->
+                        <div style="flex: 1;">
+                          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap;">
+                            <span style="font-size: 22px; font-weight: 600; color: rgba(255,255,255,0.95);">Migraine Risk</span>
+                            <span style="
+                              font-size: 11px;
+                              font-weight: 600;
+                              color: ${overallColor};
+                              background: ${overallGlow};
+                              padding: 4px 10px;
+                              border-radius: 12px;
+                              border: 1px solid ${overallColor};
+                            ">${overallIcon} ${overallRisk}</span>
+                          </div>
+                          <div style="font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.6;">
+                            Environmental trigger monitoring
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Risk bar -->
+                      <div style="
+                        height: 10px;
+                        background: rgba(255,255,255,0.05);
+                        border-radius: 5px;
+                        margin-bottom: 16px;
+                        overflow: hidden;
+                        border: 1px solid rgba(255,255,255,0.1);
+                      ">
+                        <div style="
+                          height: 100%;
+                          width: ${riskPercent}%;
+                          background: linear-gradient(90deg, #4CAF50 0%, #FFC107 30%, #FF9800 60%, #D32F2F 100%);
+                          border-radius: 5px;
+                          box-shadow: 0 0 10px ${overallGlow};
+                          transition: width 0.5s ease;
+                        "></div>
+                      </div>
+                      
+                      <!-- Recommendations -->
+                      <div style="
+                        font-size: 13px;
+                        color: rgba(255,255,255,0.85);
+                        line-height: 1.6;
+                        margin-bottom: 16px;
+                        padding: 14px;
+                        background: rgba(255,255,255,0.03);
+                        border-radius: 10px;
+                        border-left: 3px solid ${overallColor};
+                        white-space: normal;
+                        word-wrap: break-word;
+                      ">🧠 ${recommendations}</div>
+                      
+                      <!-- Divider -->
+                      <div style="
+                        height: 1px;
+                        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+                        margin-bottom: 16px;
+                      "></div>
+                      
+                      <!-- Trigger breakdown -->
+                      <div style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: 12px;
+                      ">
+                        <!-- Atmospheric Pressure -->
+                        <div style="
+                          display: flex;
+                          justify-content: space-between;
+                          align-items: center;
+                          padding: 12px;
+                          background: rgba(255,255,255,0.03);
+                          border-radius: 10px;
+                          border-left: 4px solid ${pressureColor};
+                        ">
+                          <div style="flex: 1;">
+                            <div style="font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 4px;">🌡️ Atmospheric Pressure</div>
+                            <div style="font-size: 14px; color: rgba(255,255,255,0.85); margin-bottom: 2px;">
+                              ${pressureMessage}
+                            </div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.5);">
+                              ${trendMessage}
+                            </div>
+                          </div>
+                          <div style="text-align: right; margin-left: 16px;">
+                            <div style="font-size: 24px; font-weight: 700; color: ${pressureColor};">${pressure.toFixed(1)}</div>
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.4);">hPa ${trendIcon}</div>
+                          </div>
+                        </div>
+                        
+                        <!-- Geomagnetic Activity -->
+                        <div style="
+                          display: flex;
+                          justify-content: space-between;
+                          align-items: center;
+                          padding: 12px;
+                          background: rgba(255,255,255,0.03);
+                          border-radius: 10px;
+                          border-left: 4px solid ${highestK >= 5 ? '#D32F2F' : highestK >= 3 ? '#FF9800' : '#4CAF50'};
+                        ">
+                          <div style="flex: 1;">
+                            <div style="font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 4px;">🌍 Geomagnetic Activity</div>
+                            <div style="font-size: 14px; color: rgba(255,255,255,0.85);">
+                              ${geoMessage}
+                            </div>
+                          </div>
+                          <div style="text-align: right; margin-left: 16px;">
+                            <div style="font-size: 24px; font-weight: 700; color: ${highestK >= 5 ? '#D32F2F' : highestK >= 3 ? '#FF9800' : '#4CAF50'};">K${highestK}</div>
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.4);">index</div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Bottom info -->
+                      <div style="
+                        margin-top: 16px;
+                        padding-top: 12px;
+                        border-top: 1px solid rgba(255,255,255,0.05);
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                      ">
+                        <div style="font-size: 10px; color: rgba(255,255,255,0.3);">
+                          Optimal pressure: 1013-1020 hPa
+                        </div>
+                        <div style="font-size: 10px; color: rgba(255,255,255,0.3);">
+                          Risk Score: ${riskScore.toFixed(1)}/10
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                ]]]
+          - type: custom:button-card
+            show_icon: false
+            show_name: false
+            show_state: false
+            styles:
+              card:
+                - border-radius: 16px
+                - padding: 0
+                - min-height: 200px
+                - position: relative
+                - overflow: hidden
+                - box-shadow: 0 2px 8px rgba(0,0,0,0.08)
+                - background: linear-gradient(135deg,
+              custom_fields:
+                content:
+                  - position: relative
+                  - width: 100%
+            custom_fields:
+              content: |
+                [[[
+                  const forecasted = states['sensor.cold_flu_forecasted_average'];
+                  const today = states['sensor.cold_flu_index_today'];
+                  
+                  const rating = forecasted?.attributes?.rating || 'Unknown';
+                  const trend = forecasted?.attributes?.trend || '';
+                  const city = forecasted?.attributes?.city || '';
+                  const st = forecasted?.attributes?.state || '';
+                  
+                  const forecastedValue = forecasted?.state || '--';
+                  const todayValue = today?.state || '--';
+                  
+                  const fluIndex = today?.attributes?.flu_index || '--';
+                  const feverIndex = today?.attributes?.fever_index || '--';
+                  const strepIndex = today?.attributes?.strep_index || '--';
+                  const coughIndex = today?.attributes?.cough_index || '--';
+                  
+                  // Metro Red themed colors
+                  const ratingColorMap = {
+                    'Low': '#4CAF50',
+                    'Low/Medium': '#66BB6A',
+                    'Medium': '#FFC107',
+                    'Medium/High': '#FF9800',
+                    'High': '#FF6F00',
+                    'Very High': '#D32F2F'
+                  };
+                  const ratingColor = ratingColorMap[rating] || '#B0BEC5';
+                  
+                  const trendIcon = trend === 'Increasing' ? '↑' : trend === 'Subsiding' ? '↓' : trend === 'Decreasing' ? '↓' : '→';
+                  const trendColor = trend === 'Increasing' ? '#D32F2F' : (trend === 'Subsiding' || trend === 'Decreasing') ? '#4CAF50' : '#B0BEC5';
+                  
+                  return `
+                    <div style="padding: 20px 24px;">
+                      <!-- Index breakdown -->
+                      <div style="
+                        display: flex;
+                        gap: 12px;
+                        margin-bottom: 20px;
+                        flex-wrap: wrap;
+                      ">
+                        <div style="
+                          flex: 1;
+                          min-width: 70px;
+                          text-align: center;
+                          padding: 12px;
+                          background: rgba(255,255,255,0.03);
+                          border-radius: 10px;
+                          border: 1px solid rgba(255,255,255,0.05);
+                        ">
+                          <div style="font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 4px;">🤒 Flu</div>
+                          <div style="font-size: 18px; font-weight: 700; color: #64B5F6;">${fluIndex}</div>
+                        </div>
+                        <div style="
+                          flex: 1;
+                          min-width: 70px;
+                          text-align: center;
+                          padding: 12px;
+                          background: rgba(255,255,255,0.03);
+                          border-radius: 10px;
+                          border: 1px solid rgba(255,255,255,0.05);
+                        ">
+                          <div style="font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 4px;">🌡️ Fever</div>
+                          <div style="font-size: 18px; font-weight: 700; color: #FF8A65;">${feverIndex}</div>
+                        </div>
+                        <div style="
+                          flex: 1;
+                          min-width: 70px;
+                          text-align: center;
+                          padding: 12px;
+                          background: rgba(255,255,255,0.03);
+                          border-radius: 10px;
+                          border: 1px solid rgba(255,255,255,0.05);
+                        ">
+                          <div style="font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 4px;">🦠 Strep</div>
+                          <div style="font-size: 18px; font-weight: 700; color: #BA68C8;">${strepIndex}</div>
+                        </div>
+                        <div style="
+                          flex: 1;
+                          min-width: 70px;
+                          text-align: center;
+                          padding: 12px;
+                          background: rgba(255,255,255,0.03);
+                          border-radius: 10px;
+                          border: 1px solid rgba(255,255,255,0.05);
+                        ">
+                          <div style="font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 4px;">😷 Cough</div>
+                          <div style="font-size: 18px; font-weight: 700; color: #4DB6AC;">${coughIndex}</div>
+                        </div>
+                      </div>
+                      
+                      <!-- Divider -->
+                      <div style="
+                        height: 1px;
+                        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+                        margin-bottom: 16px;
+                      "></div>
+                      
+                      <!-- Bottom section -->
+                      <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                      ">
+                        <!-- Left side -->
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                          <!-- Title row -->
+                          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span style="font-size: 22px; font-weight: 600; color: rgba(255,255,255,0.95);">Cold & Flu</span>
+                            <span style="
+                              font-size: 11px;
+                              font-weight: 600;
+                              color: ${ratingColor};
+                              background: ${ratingColor}20;
+                              padding: 4px 10px;
+                              border-radius: 12px;
+                              border: 1px solid ${ratingColor};
+                            ">${rating}</span>
+                            <span style="font-size: 13px; color: ${trendColor}; font-weight: 500;">${trendIcon} ${trend}</span>
+                          </div>
+                          
+                          <!-- Info row -->
+                          <div style="display: flex; gap: 14px; font-size: 11px; color: rgba(255,255,255,0.6); flex-wrap: wrap;">
+                            <span>📍 ${city}, ${st}</span>
+                          </div>
+                        </div>
+                        
+                        <!-- Right side - values -->
+                        <div style="display: flex; gap: 16px; align-items: center;">
+                          <div style="text-align: center;">
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 2px;">Today</div>
+                            <div style="font-size: 20px; font-weight: 700; color: rgba(255,255,255,0.95);">${todayValue}</div>
+                          </div>
+                          <div style="text-align: center;">
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 2px;">Forecast</div>
+                            <div style="font-size: 20px; font-weight: 700; color: rgba(255,255,255,0.95);">${forecastedValue}</div>
+                          </div>
+                          <div style="
+                            width: 44px;
+                            height: 44px;
+                            background: rgba(255,255,255,0.05);
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            flex-shrink: 0;
+                            border: 2px solid rgba(255,255,255,0.1);
+                          ">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="rgba(255,255,255,0.7)">
+                              <path d="M12 2C13.1 2 14 2.9 14 4V12.5C15.2 13.3 16 14.6 16 16C16 18.2 14.2 20 12 20S8 18.2 8 16C8 14.6 8.8 13.3 10 12.5V4C10 2.9 10.9 2 12 2M12 4C11.4 4 11 4.4 11 5V7H13V5C13 4.4 12.6 4 12 4M12 18C13.1 18 14 17.1 14 16C14 15.2 13.5 14.5 12.8 14.2L12 13.9V9H11V13.9L10.2 14.2C9.5 14.5 9 15.2 9 16C9 17.1 9.9 18 11 18H12Z"/>
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                ]]]
+      - type: grid
+        cards:
+          - type: custom:button-card
+            show_icon: false
+            show_name: false
+            show_state: false
+            styles:
+              card:
+                - border-radius: 16px
+                - padding: 0
+                - min-height: 200px
+                - position: relative
+                - overflow: hidden
+                - box-shadow: 0 2px 8px rgba(0,0,0,0.08)
+                - background: linear-gradient(135deg,
+              custom_fields:
+                content:
+                  - position: relative
+                  - width: 100%
+            custom_fields:
+              content: |
+                [[[
+                  const currentWeight = parseFloat(states['sensor.weight']?.state) || 0;
+                  const startingWeight = parseFloat(states['var.starting_weight']?.state) || 0;
+                  const targetWeight = parseFloat(states['var.target_weight']?.state) || 0;
+                  
+                  const totalToLose = startingWeight - targetWeight;
+                  const lostSoFar = startingWeight - currentWeight;
+                  const leftToLose = currentWeight - targetWeight;
+                  const progressPercent = totalToLose > 0 ? Math.min(Math.max((lostSoFar / totalToLose) * 100, 0), 100) : 0;
+                  
+                  // Calculate estimated days to goal (assuming 1.5 lbs per week average)
+                  const weeksToGoal = leftToLose / 1.5;
+                  const daysToGoal = Math.ceil(weeksToGoal * 7);
+                  
+                  // Metro Red themed colors
+                  let motivationMessage, statusColor, statusGlow, statusIcon;
+                  if (progressPercent >= 100) {
+                    motivationMessage = "Congratulations! You've reached your goal weight!";
+                    statusColor = '#4CAF50';
+                    statusGlow = 'rgba(76, 175, 80, 0.3)';
+                    statusIcon = '🎉';
+                  } else if (progressPercent >= 75) {
+                    motivationMessage = "Almost there! You're so close to your goal. Keep pushing!";
+                    statusColor = '#66BB6A';
+                    statusGlow = 'rgba(102, 187, 106, 0.3)';
+                    statusIcon = '💪';
+                  } else if (progressPercent >= 50) {
+                    motivationMessage = "Halfway there! You're making amazing progress. Stay focused!";
+                    statusColor = '#26A69A';
+                    statusGlow = 'rgba(38, 166, 154, 0.3)';
+                    statusIcon = '🔥';
+                  } else if (progressPercent >= 25) {
+                    motivationMessage = "Great start! You're building momentum. Keep it up!";
+                    statusColor = '#4DB6AC';
+                    statusGlow = 'rgba(77, 182, 172, 0.3)';
+                    statusIcon = '⭐';
+                  } else if (progressPercent > 0) {
+                    motivationMessage = "Every journey begins with a single step. You've got this!";
+                    statusColor = '#80CBC4';
+                    statusGlow = 'rgba(128, 203, 196, 0.3)';
+                    statusIcon = '🌱';
+                  } else {
+                    motivationMessage = "Ready to start your journey? Today is a great day to begin!";
+                    statusColor = '#B0BEC5';
+                    statusGlow = 'rgba(176, 190, 197, 0.3)';
+                    statusIcon = '🎯';
+                  }
+                  
+                  // Calculate progress ring
+                  const circumference = 2 * Math.PI * 32;
+                  const strokeDashoffset = circumference - (progressPercent / 100) * circumference;
+                  
+                  return `
+                    <div style="padding: 20px 24px;">
+                      <!-- Main weight display with progress ring -->
+                      <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 18px;
+                        margin-bottom: 14px;
+                      ">
+                        <!-- Progress ring -->
+                        <div style="position: relative; width: 76px; height: 76px; flex-shrink: 0;">
+                          <svg width="76" height="76" viewBox="0 0 76 76">
+                            <!-- Background circle -->
+                            <circle cx="38" cy="38" r="32" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="6"/>
+                            <!-- Progress circle -->
+                            <circle cx="38" cy="38" r="32" fill="none" stroke="${statusColor}" stroke-width="6" 
+                              stroke-linecap="round"
+                              stroke-dasharray="${circumference}"
+                              stroke-dashoffset="${strokeDashoffset}"
+                              transform="rotate(-90 38 38)"
+                              style="filter: drop-shadow(0 0 6px ${statusGlow});"/>
+                          </svg>
+                          <div style="
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            text-align: center;
+                          ">
+                            <div style="font-size: 20px; font-weight: 700; color: ${statusColor}; line-height: 1; text-shadow: 0 0 8px ${statusGlow};">
+                              ${progressPercent.toFixed(0)}<span style="font-size: 12px;">%</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div style="flex: 1;">
+                          <div style="font-size: 38px; font-weight: 700; color: rgba(255,255,255,0.95); line-height: 1; margin-bottom: 6px;">
+                            ${currentWeight.toFixed(1)} <span style="font-size: 16px; font-weight: 400; color: rgba(255,255,255,0.5);">lb</span>
+                          </div>
+                          <div style="font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.6;">
+                            Current Weight
+                            ${daysToGoal > 0 && progressPercent < 100 ? `<br><span style="color: ${statusColor};">~${daysToGoal} days to goal</span>` : ''}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Progress bar with gradient -->
+                      <div style="
+                        height: 10px;
+                        background: rgba(255,255,255,0.05);
+                        border-radius: 5px;
+                        margin-bottom: 10px;
+                        overflow: hidden;
+                        position: relative;
+                      ">
+                        <div style="
+                          height: 100%;
+                          width: ${progressPercent}%;
+                          background: linear-gradient(90deg, #26A69A 0%, #4DB6AC 50%, #66BB6A 100%);
+                          border-radius: 5px;
+                          transition: width 0.5s ease;
+                          box-shadow: 0 0 10px ${statusGlow};
+                        "></div>
+                      </div>
+                      
+                      <!-- Progress stats -->
+                      <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        font-size: 11px;
+                        color: rgba(255,255,255,0.5);
+                        margin-bottom: 16px;
+                      ">
+                        <span>Start: ${startingWeight.toFixed(1)} lb</span>
+                        <span style="color: ${statusColor}; font-weight: 600;">${statusIcon} ${progressPercent.toFixed(1)}%</span>
+                        <span>Goal: ${targetWeight.toFixed(1)} lb</span>
+                      </div>
+                      
+                      <!-- Motivation message -->
+                      <div style="
+                        font-size: 13px;
+                        color: rgba(255,255,255,0.85);
+                        line-height: 1.6;
+                        margin-bottom: 16px;
+                        padding: 14px;
+                        background: rgba(255,255,255,0.03);
+                        border-radius: 10px;
+                        border-left: 3px solid ${statusColor};
+                        white-space: normal;
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
+                      ">${motivationMessage}</div>
+                      
+                      <!-- Divider -->
+                      <div style="
+                        height: 1px;
+                        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+                        margin-bottom: 16px;
+                      "></div>
+                      
+                      <!-- Bottom section -->
+                      <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 14px;
+                      ">
+                        <!-- Left side -->
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span style="font-size: 20px; font-weight: 600; color: rgba(255,255,255,0.95);">Weight Journey</span>
+                            <span style="
+                              font-size: 11px;
+                              font-weight: 600;
+                              color: ${statusColor};
+                              background: ${statusGlow};
+                              padding: 4px 10px;
+                              border-radius: 12px;
+                              border: 1px solid ${statusColor};
+                            ">${progressPercent >= 100 ? '🎯 Goal Reached!' : leftToLose.toFixed(1) + ' lb to go'}</span>
+                          </div>
+                          <div style="display: flex; gap: 16px; font-size: 11px; color: rgba(255,255,255,0.6); flex-wrap: wrap;">
+                            <span>📉 Lost: <span style="color: ${statusColor}; font-weight: 500;">${lostSoFar.toFixed(1)} lb</span></span>
+                            <span>🎯 Goal: <span style="color: rgba(255,255,255,0.8); font-weight: 500;">${targetWeight.toFixed(1)} lb</span></span>
+                          </div>
+                        </div>
+                        
+                        <!-- Right side - stats with Metro theme -->
+                        <div style="display: flex; gap: 16px; align-items: center;">
+                          <div style="
+                            text-align: center;
+                            padding: 8px 12px;
+                            background: rgba(38, 166, 154, 0.1);
+                            border-radius: 8px;
+                            border: 1px solid rgba(38, 166, 154, 0.3);
+                          ">
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 2px;">Lost</div>
+                            <div style="font-size: 18px; font-weight: 700; color: #4DB6AC;">${lostSoFar.toFixed(1)}</div>
+                          </div>
+                          <div style="
+                            text-align: center;
+                            padding: 8px 12px;
+                            background: rgba(255,255,255,0.05);
+                            border-radius: 8px;
+                            border: 1px solid rgba(255,255,255,0.1);
+                          ">
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 2px;">To Go</div>
+                            <div style="font-size: 18px; font-weight: 700; color: rgba(255,255,255,0.9);">${leftToLose.toFixed(1)}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                ]]]
+            grid_options:
+              columns: 12
+          - type: custom:button-card
+            show_icon: false
+            show_name: false
+            show_state: false
+            styles:
+              card:
+                - border-radius: 16px
+                - padding: 0
+                - min-height: 280px
+                - position: relative
+                - overflow: hidden
+                - box-shadow: 0 2px 8px rgba(0,0,0,0.08)
+                - background: linear-gradient(135deg,
+              custom_fields:
+                content:
+                  - position: relative
+                  - width: 100%
+            custom_fields:
+              content: |
+                [[[
+                  const duration = states['sensor.sleep_duration'];
+                  const score = states['sensor.sleep_score'];
+                  const deep = states['sensor.sleep_deep_sleep'];
+                  const light = states['sensor.sleep_light_sleep'];
+                  const rem = states['sensor.sleep_rem_sleep'];
+                  const heartRate = states['sensor.sleep_heart_rate'];
+                  const snoring = states['sensor.sleep_snoring'];
+                  const timeToSleep = states['sensor.sleep_to_to_sleep'];
+                  const inBed = states['binary_sensor.withings_in_bed'];
+                  
+                  const sleepScore = parseInt(score?.state) || 0;
+                  const durationFormatted = duration?.attributes?.time_formatted || '--';
+                  const deepFormatted = deep?.attributes?.time_formatted || '--';
+                  const lightFormatted = light?.attributes?.time_formatted || '--';
+                  const remFormatted = rem?.attributes?.time_formatted || '--';
+                  const timeToSleepFormatted = timeToSleep?.attributes?.time_formatted || '--';
+                  
+                  const deepPercent = parseFloat(deep?.attributes?.percent_sleep) || 0;
+                  const lightPercent = parseFloat(light?.attributes?.percent_sleep) || 0;
+                  const remPercent = parseFloat(rem?.attributes?.percent_sleep) || 0;
+                  
+                  const hrAvg = heartRate?.state || '--';
+                  const hrMin = heartRate?.attributes?.minimum || '--';
+                  const hrMax = heartRate?.attributes?.maximum || '--';
+                  
+                  const snoringTime = snoring?.attributes?.time_formatted || '0 min';
+                  const snoringEpisodes = snoring?.attributes?.episode_count || 0;
+                  
+                  const isInBed = inBed?.state === 'on';
+                  
+                  // Metro Red themed score colors
+                  let scoreColor, scoreLabel;
+                  if (sleepScore >= 80) {
+                    scoreColor = '#4CAF50';
+                    scoreLabel = 'Excellent';
+                  } else if (sleepScore >= 70) {
+                    scoreColor = '#66BB6A';
+                    scoreLabel = 'Good';
+                  } else if (sleepScore >= 60) {
+                    scoreColor = '#FFC107';
+                    scoreLabel = 'Fair';
+                  } else if (sleepScore >= 50) {
+                    scoreColor = '#FF9800';
+                    scoreLabel = 'Poor';
+                  } else {
+                    scoreColor = '#FF6F00';
+                    scoreLabel = 'Bad';
+                  }
+                  
+                  // Calculate score ring
+                  const scorePercent = Math.min(sleepScore, 100);
+                  const circumference = 2 * Math.PI * 36;
+                  const strokeDashoffset = circumference - (scorePercent / 100) * circumference;
+                  
+                  return `
+                    <div style="padding: 20px 24px;">
+                      <!-- Header -->
+                      <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 20px;
+                        margin-bottom: 20px;
+                      ">
+                        <!-- Score circle -->
+                        <div style="position: relative; width: 84px; height: 84px; flex-shrink: 0;">
+                          <svg width="84" height="84" viewBox="0 0 84 84">
+                            <circle cx="42" cy="42" r="36" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="7"/>
+                            <circle cx="42" cy="42" r="36" fill="none" stroke="${scoreColor}" stroke-width="7" 
+                              stroke-linecap="round"
+                              stroke-dasharray="${circumference}"
+                              stroke-dashoffset="${strokeDashoffset}"
+                              transform="rotate(-90 42 42)"
+                              style="filter: drop-shadow(0 0 8px ${scoreColor}80);"/>
+                          </svg>
+                          <div style="
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            text-align: center;
+                          ">
+                            <div style="font-size: 26px; font-weight: 700; color: ${scoreColor}; line-height: 1; text-shadow: 0 0 8px ${scoreColor}40;">${sleepScore}</div>
+                            <div style="font-size: 8px; color: rgba(255,255,255,0.4); text-transform: uppercase;">Score</div>
+                          </div>
+                        </div>
+                        
+                        <!-- Title and duration -->
+                        <div style="flex: 1;">
+                          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px; flex-wrap: wrap;">
+                            <span style="font-size: 22px; font-weight: 600; color: rgba(255,255,255,0.95);">Sleep</span>
+                            <span style="
+                              font-size: 11px;
+                              font-weight: 600;
+                              color: ${scoreColor};
+                              background: ${scoreColor}20;
+                              padding: 3px 8px;
+                              border-radius: 10px;
+                              border: 1px solid ${scoreColor}40;
+                            ">${scoreLabel}</span>
+                            ${isInBed ? `<span style="font-size: 10px; color: #64B5F6;">😴 In Bed</span>` : ''}
+                          </div>
+                          <div style="font-size: 30px; font-weight: 300; color: rgba(255,255,255,0.95); margin-bottom: 4px;">${durationFormatted}</div>
+                          <div style="font-size: 11px; color: rgba(255,255,255,0.4);">
+                            ⏱️ ${timeToSleepFormatted} to fall asleep
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Sleep stages bar -->
+                      <div style="margin-bottom: 16px;">
+                        <div style="font-size: 10px; color: rgba(255,255,255,0.3); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Sleep Stages</div>
+                        <div style="
+                          height: 14px;
+                          border-radius: 7px;
+                          overflow: hidden;
+                          display: flex;
+                          background: rgba(255,255,255,0.05);
+                          border: 1px solid rgba(255,255,255,0.1);
+                        ">
+                          <div style="width: ${deepPercent}%; background: #5C6BC0; box-shadow: inset 0 0 10px rgba(92,107,192,0.5);" title="Deep"></div>
+                          <div style="width: ${lightPercent}%; background: #7986CB; box-shadow: inset 0 0 10px rgba(121,134,203,0.5);" title="Light"></div>
+                          <div style="width: ${remPercent}%; background: #9FA8DA; box-shadow: inset 0 0 10px rgba(159,168,218,0.5);" title="REM"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 6px; font-size: 10px;">
+                          <span style="color: #5C6BC0; font-weight: 500;">● Deep ${deepPercent.toFixed(0)}%</span>
+                          <span style="color: #7986CB; font-weight: 500;">● Light ${lightPercent.toFixed(0)}%</span>
+                          <span style="color: #9FA8DA; font-weight: 500;">● REM ${remPercent.toFixed(0)}%</span>
+                        </div>
+                      </div>
+                      
+                      <!-- Divider -->
+                      <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); margin-bottom: 16px;"></div>
+                      
+                      <!-- Stats grid -->
+                      <div style="
+                        display: grid;
+                        grid-template-columns: repeat(4, 1fr);
+                        gap: 12px;
+                      ">
+                        <div style="
+                          text-align: center;
+                          padding: 10px;
+                          background: rgba(92,107,192,0.1);
+                          border-radius: 8px;
+                          border: 1px solid rgba(92,107,192,0.2);
+                        ">
+                          <div style="font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 4px;">🌙 Deep</div>
+                          <div style="font-size: 15px; font-weight: 700; color: #5C6BC0;">${deepFormatted}</div>
+                        </div>
+                        <div style="
+                          text-align: center;
+                          padding: 10px;
+                          background: rgba(121,134,203,0.1);
+                          border-radius: 8px;
+                          border: 1px solid rgba(121,134,203,0.2);
+                        ">
+                          <div style="font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 4px;">💤 Light</div>
+                          <div style="font-size: 15px; font-weight: 700; color: #7986CB;">${lightFormatted}</div>
+                        </div>
+                        <div style="
+                          text-align: center;
+                          padding: 10px;
+                          background: rgba(159,168,218,0.1);
+                          border-radius: 8px;
+                          border: 1px solid rgba(159,168,218,0.2);
+                        ">
+                          <div style="font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 4px;">💭 REM</div>
+                          <div style="font-size: 15px; font-weight: 700; color: #9FA8DA;">${remFormatted}</div>
+                        </div>
+                        <div style="
+                          text-align: center;
+                          padding: 10px;
+                          background: rgba(239,154,154,0.1);
+                          border-radius: 8px;
+                          border: 1px solid rgba(239,154,154,0.2);
+                        ">
+                          <div style="font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 4px;">❤️ Heart</div>
+                          <div style="font-size: 15px; font-weight: 700; color: #EF9A9A;">${hrAvg}</div>
+                          <div style="font-size: 9px; color: rgba(255,255,255,0.3);">${hrMin}-${hrMax}</div>
+                        </div>
+                      </div>
+                      
+                      <!-- Snoring (if any) -->
+                      ${parseInt(snoring?.state) > 0 ? `
+                        <div style="
+                          margin-top: 12px;
+                          padding: 10px 14px;
+                          background: rgba(255,255,255,0.03);
+                          border-radius: 8px;
+                          font-size: 11px;
+                          color: rgba(255,255,255,0.6);
+                          border: 1px solid rgba(255,255,255,0.05);
+                        ">
+                          😤 Snoring: ${snoringTime} (${snoringEpisodes} episodes)
+                        </div>
+                      ` : ''}
+                    </div>
+                  `;
+                ]]]
+          - type: custom:button-card
+            show_icon: false
+            show_name: false
+            show_state: false
+            styles:
+              card:
+                - border-radius: 16px
+                - padding: 0
+                - min-height: 200px
+                - position: relative
+                - overflow: hidden
+                - box-shadow: 0 2px 8px rgba(0,0,0,0.08)
+                - background: linear-gradient(135deg,
+              custom_fields:
+                content:
+                  - position: relative
+                  - width: 100%
+            custom_fields:
+              content: |
+                [[[
+                  const uvSensor = states['sensor.openuv_skin_type_2_safe_exposure_time'];
+                  const minutes = parseInt(uvSensor?.state) || 0;
+                  
+                  const hours = Math.floor(minutes / 60);
+                  const mins = minutes % 60;
+                  const timeFormatted = hours > 0 ? `${hours}h ${mins}m` : `${mins} min`;
+                  
+                  // Metro Red themed safety levels
+                  let safetyLevel, safetyColor, safetyGlow, safetyMessage;
+                  if (minutes >= 120) {
+                    safetyLevel = 'Low Risk';
+                    safetyColor = '#4CAF50';
+                    safetyGlow = 'rgba(76, 175, 80, 0.3)';
+                    safetyMessage = 'UV levels are low. Enjoy outdoor activities with minimal sun protection.';
+                  } else if (minutes >= 60) {
+                    safetyLevel = 'Moderate';
+                    safetyColor = '#66BB6A';
+                    safetyGlow = 'rgba(102, 187, 106, 0.3)';
+                    safetyMessage = 'UV levels are moderate. Consider sunscreen for extended outdoor activities.';
+                  } else if (minutes >= 30) {
+                    safetyLevel = 'High';
+                    safetyColor = '#FFC107';
+                    safetyGlow = 'rgba(255, 193, 7, 0.3)';
+                    safetyMessage = 'UV levels are high. Sunscreen and protective clothing recommended.';
+                  } else if (minutes >= 15) {
+                    safetyLevel = 'Very High';
+                    safetyColor = '#FF9800';
+                    safetyGlow = 'rgba(255, 152, 0, 0.3)';
+                    safetyMessage = 'UV levels are very high. Limit sun exposure and use SPF 30+ sunscreen.';
+                  } else {
+                    safetyLevel = 'Extreme';
+                    safetyColor = '#D32F2F';
+                    safetyGlow = 'rgba(211, 47, 47, 0.3)';
+                    safetyMessage = 'UV levels are extreme. Avoid sun exposure. Seek shade and wear protective gear.';
+                  }
+                  
+                  // Progress bar percentage (max 180 min = 3 hours)
+                  const progressPercent = Math.min((minutes / 180) * 100, 100);
+                  
+                  return `
+                    <div style="padding: 20px 24px;">
+                      <!-- Main exposure time -->
+                      <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 18px;
+                        margin-bottom: 12px;
+                      ">
+                        <div style="
+                          width: 70px;
+                          height: 70px;
+                          background: rgba(255,255,255,0.05);
+                          border-radius: 50%;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          flex-shrink: 0;
+                          border: 3px solid ${safetyColor};
+                          box-shadow: 0 0 20px ${safetyGlow};
+                        ">
+                          <svg viewBox="0 0 24 24" width="36" height="36" fill="${safetyColor}">
+                            <circle cx="12" cy="12" r="5"/>
+                            <path d="M12 1v3M12 20v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M1 12h3M20 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12" stroke="${safetyColor}" stroke-width="2" stroke-linecap="round"/>
+                          </svg>
+                        </div>
+                        <div>
+                          <div style="font-size: 36px; font-weight: 700; color: rgba(255,255,255,0.95); line-height: 1;">${timeFormatted}</div>
+                          <div style="font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 4px;">Safe exposure time</div>
+                        </div>
+                      </div>
+                      
+                      <!-- Progress bar -->
+                      <div style="
+                        height: 8px;
+                        background: rgba(255,255,255,0.05);
+                        border-radius: 4px;
+                        margin-bottom: 16px;
+                        overflow: hidden;
+                      ">
+                        <div style="
+                          height: 100%;
+                          width: ${progressPercent}%;
+                          background: linear-gradient(90deg, #D32F2F 0%, #FF9800 30%, #FFC107 60%, #66BB6A 100%);
+                          border-radius: 4px;
+                          box-shadow: 0 0 10px ${safetyGlow};
+                        "></div>
+                      </div>
+                      
+                      <!-- Safety message -->
+                      <div style="
+                        font-size: 13px;
+                        color: rgba(255,255,255,0.85);
+                        line-height: 1.6;
+                        margin-bottom: 16px;
+                        padding: 14px;
+                        background: rgba(255,255,255,0.03);
+                        border-radius: 10px;
+                        border-left: 3px solid ${safetyColor};
+                        white-space: normal;
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
+                      ">${safetyMessage}</div>
+                      
+                      <!-- Divider -->
+                      <div style="
+                        height: 1px;
+                        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+                        margin-bottom: 16px;
+                      "></div>
+                      
+                      <!-- Bottom section -->
+                      <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                      ">
+                        <!-- Left side -->
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span style="font-size: 20px; font-weight: 600; color: rgba(255,255,255,0.95);">UV Exposure</span>
+                            <span style="
+                              font-size: 11px;
+                              font-weight: 600;
+                              color: ${safetyColor};
+                              background: ${safetyGlow};
+                              padding: 4px 10px;
+                              border-radius: 12px;
+                              border: 1px solid ${safetyColor};
+                            ">${safetyLevel}</span>
+                          </div>
+                          <div style="display: flex; gap: 14px; font-size: 11px; color: rgba(255,255,255,0.6); flex-wrap: wrap;">
+                            <span>👤 Skin Type 2</span>
+                            <span>☀️ ${minutes} minutes unprotected</span>
+                          </div>
+                        </div>
+                        
+                        <!-- Right side - raw value -->
+                        <div style="
+                          text-align: center;
+                          padding: 8px 12px;
+                          background: rgba(255,255,255,0.05);
+                          border-radius: 8px;
+                          border: 1px solid rgba(255,255,255,0.1);
+                        ">
+                          <div style="font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 2px;">Raw Index</div>
+                          <div style="font-size: 18px; font-weight: 700; color: rgba(255,255,255,0.9);">${minutes}</div>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                ]]]
+    theme: Metro Red
+    cards: []
+    badges:
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:walk
+        entity: sensor.serendipity_steps_2
+        name: Steps
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:lightning-bolt
+        entity: hae.homeassistant_active_energy
+        show_entity_picture: false
+        name: Active Energy
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:run
+        entity: hae.homeassistant_apple_exercise_time
+        name: Exercise Time
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:human-handsup
+        entity: hae.homeassistant_apple_stand_hour
+        name: Hours standing
+        show_entity_picture: false
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:account-clock
+        entity: hae.homeassistant_apple_stand_time
+        name: Standing
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:fire
+        entity: hae.homeassistant_basal_energy_burned
+        name: Basal Energy
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:water-percent
+        entity: hae.homeassistant_blood_oxygen_saturation
+        name: Blood Oxygen
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:percent
+        entity: hae.homeassistant_body_fat_percentage
+        name: Body Fat
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:calculator
+        entity: hae.homeassistant_body_mass_index
+        name: BMI
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:stairs-up
+        entity: hae.homeassistant_flights_climbed
+        name: Stairs
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:headphones
+        entity: hae.homeassistant_headphone_audio_exposure
+        name: Audio
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:heart-pulse
+        entity: hae.homeassistant_heart_rate_avg
+        name: Heart Rate
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:heart-cog
+        entity: hae.homeassistant_heart_rate_variability
+        name: HR Variability
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:human-male-height
+        entity: hae.homeassistant_height
+        name: Height
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:arm-flex
+        entity: hae.homeassistant_lean_body_mass
+        name: Lean Body Mass
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:dumbbell
+        entity: hae.homeassistant_physical_effort
+        name: Physical Effort
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:heart-outline
+        entity: hae.homeassistant_resting_heart_rate
+        name: Resting HR
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:white-balance-sunny
+        entity: hae.homeassistant_time_in_daylight
+        name: Time in Daylight
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:lungs
+        entity: hae.homeassistant_vo2_max
+        name: VO2
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:walk-heart
+        entity: hae.homeassistant_walking_heart_rate_average
+        name: Walking HR
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        icon: mdi:speedometer
+        entity: hae.homeassistant_walking_speed
+        name: Walking Speed
