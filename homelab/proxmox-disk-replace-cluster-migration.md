@@ -44,7 +44,7 @@ source /etc/network/interfaces.d/*
 |---|---|---|
 | `/mnt/movies` | `<synology-nas-ip>:/volume1/Movies` (NFSv4.1) | Synology, clientaddr <this-node-ip> |
 | `/mnt/tv` | `<synology-nas-ip>:/volume2/Media/TV` (NFSv4.1) | Synology, clientaddr <this-node-ip> |
-| `/mnt/unas` | `<unas-ip>:/var/nfs/shared/Shared_Drive` (NFSv3, `_netdev`) | Generic NFS server |
+| `/mnt/unas` | `<unas-ip>:/var/nfs/shared/Shared_Drive` (NFSv3, `_netdev`) | Generic NFS server (UniFi UNAS 4) |
 
 Confirmed from `pct config`: these are mounted at the **host** level and bind-mounted straight into `plexy` (100) as host-directory mounts:
 
