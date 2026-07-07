@@ -75,3 +75,6 @@ The ADS-B build stands on the work of **abcd567**
 [FlightAware forum](https://discussions.flightaware.com/)) and the
 [Proxmox VE Helper-Scripts](https://github.com/community-scripts/ProxmoxVE) community.
 Quality profiles come from the [TRaSH Guides](https://trash-guides.info/) via Recyclarr.
+And a big thank-you to [**Biblioman** (biblioman.chitanka.info)](https://biblioman.chitanka.info/)
+for opening their source code and book database — the custom Bulgarian metadata provider
+would not exist without it.
