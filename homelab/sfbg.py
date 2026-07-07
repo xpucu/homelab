@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-#  Biblioman metadata provider for Autocaliweb / Calibre-Web
-#  Fetches Bulgarian book metadata from https://biblioman.chitanka.info
+#  SFBG metadata provider for Autocaliweb / Calibre-Web
+#  Fetches Bulgarian (SF/fantasy) book metadata from http://sfbg.us
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -21,19 +21,19 @@ from cps.services.Metadata import MetaRecord, MetaSourceInfo, Metadata
 log = logger.create()
 
 
-class Biblioman(Metadata):
-    __name__ = "Biblioman"
-    __id__ = "biblioman"
-    DESCRIPTION = "Biblioman (chitanka.info)"
-    META_URL = "https://biblioman.chitanka.info/"
-    BASE_URL = "https://biblioman.chitanka.info"
-    SEARCH_URL = "https://biblioman.chitanka.info/books?q="
-    MAX_RESULTS = 5  # how many result rows to follow into full book pages
+class SFBG(Metadata):
+    __name__ = "SFBG"
+    __id__ = "sfbg"
+    DESCRIPTION = "SFBG (sfbg.us)"
+    META_URL = "http://sfbg.us/"
+    BASE_URL = "http://sfbg.us"
+    SEARCH_URL = "http://sfbg.us/search?query="
+    MAX_RESULTS = 5
     HEADERS = {
         "User-Agent": constants.USER_AGENT,
         "Accept-Language": "bg,en;q=0.8",
     }
-    TIMEOUT = 8  # seconds -- never hang the fetch dialog
+    TIMEOUT = 8  # never hang the fetch dialog
 
     def search(
         self, query: str, generic_cover: str = "", locale: str = "en"
@@ -44,52 +44,45 @@ class Biblioman(Metadata):
         if not query or not query.strip():
             return val
 
-        q = query.strip()
-        # ISBN? use the isbn: field; otherwise search as a title.
-        if re.fullmatch(r"[\d\-xX]{10,17}", q):
-            search_q = "isbn:" + q.replace("-", "")
-        else:
-            search_q = "title: " + q
-
         try:
             resp = requests.get(
-                Biblioman.SEARCH_URL + quote(search_q.encode("utf-8")),
-                headers=Biblioman.HEADERS,
-                timeout=Biblioman.TIMEOUT,
+                SFBG.SEARCH_URL + quote(query.strip().encode("utf-8")),
+                headers=SFBG.HEADERS,
+                timeout=SFBG.TIMEOUT,
             )
             resp.raise_for_status()
         except Exception as e:
-            log.warning("Biblioman search failed: %s", e)
+            log.warning("SFBG search failed: %s", e)
             return val
 
         try:
             tree = lxml_html.fromstring(resp.content)
         except Exception as e:
-            log.warning("Biblioman: could not parse search page: %s", e)
+            log.warning("SFBG: could not parse search page: %s", e)
             return val
 
-        # Search results link to /books/<id>. Collect unique ids in order.
+        # Results link to /book/<CODE>. Collect unique codes in order.
         book_links = []
         seen = set()
-        for href in tree.xpath('//a[contains(@href, "/books/")]/@href'):
-            m = re.search(r"/books/(\d+)(?:$|[/?#])", href)
+        for href in tree.xpath('//a[contains(@href, "/book/")]/@href'):
+            m = re.search(r"/book/([A-Za-z0-9\-]+)", href)
             if not m:
                 continue
-            book_id = m.group(1)
-            if book_id in seen:
+            code = m.group(1)
+            if code in seen:
                 continue
-            seen.add(book_id)
-            book_links.append((book_id, urljoin(Biblioman.BASE_URL, href)))
-            if len(book_links) >= Biblioman.MAX_RESULTS:
+            seen.add(code)
+            book_links.append((code, urljoin(SFBG.BASE_URL, href)))
+            if len(book_links) >= SFBG.MAX_RESULTS:
                 break
 
-        for book_id, book_url in book_links:
+        for code, book_url in book_links:
             try:
-                mr = self._fetch_book(book_id, book_url, generic_cover)
+                mr = self._fetch_book(code, book_url, generic_cover)
                 if mr:
                     val.append(mr)
             except Exception as e:
-                log.warning("Biblioman: failed to parse book %s: %s", book_id, e)
+                log.warning("SFBG: failed to parse book %s: %s", code, e)
                 continue
         return val
 
@@ -97,104 +90,78 @@ class Biblioman(Metadata):
 
     @staticmethod
     def _clean(text: str) -> str:
-        # biblioman pages are full of tabs/newlines used for layout
         return re.sub(r"\s+", " ", (text or "")).strip()
 
-    def _dd_text(self, tree, field_class: str) -> str:
-        """Return cleaned text of the <dd> for a given entity-field-* class."""
-        nodes = tree.xpath(
-            f'//dd[contains(concat(" ", normalize-space(@class), " "),'
-            f' " entity-field-{field_class} ")]'
-        )
-        if nodes:
-            return self._clean(nodes[0].text_content())
-        return ""
-
-    def _dd_links(self, tree, field_class: str) -> List[str]:
-        """Return list of <a> texts inside the <dd> for a field (multi-value)."""
-        nodes = tree.xpath(
-            f'//dd[contains(concat(" ", normalize-space(@class), " "),'
-            f' " entity-field-{field_class} ")]//a'
-        )
-        out = []
-        for n in nodes:
-            txt = self._clean(n.text_content())
-            if txt:
-                out.append(txt)
-        return out
+    def _rows(self, tree) -> dict:
+        """Build a dict of {label(without trailing colon): value} from the
+        book page's metadata table."""
+        data = {}
+        for tr in tree.xpath('//table//tr'):
+            cells = tr.xpath('./td|./th')
+            if len(cells) >= 2:
+                label = self._clean(cells[0].text_content()).rstrip(":").lstrip("+").strip()
+                value = self._clean(cells[1].text_content())
+                if label and value and label not in data:
+                    data[label] = value
+        return data
 
     # -- book page parsing ---------------------------------------------------
 
     def _fetch_book(
-        self, book_id: str, book_url: str, generic_cover: str
+        self, code: str, book_url: str, generic_cover: str
     ) -> Optional[MetaRecord]:
         try:
             resp = requests.get(
-                book_url, headers=Biblioman.HEADERS, timeout=Biblioman.TIMEOUT
+                book_url, headers=SFBG.HEADERS, timeout=SFBG.TIMEOUT
             )
             resp.raise_for_status()
         except Exception as e:
-            log.warning("Biblioman: book fetch failed %s: %s", book_url, e)
+            log.warning("SFBG: book fetch failed %s: %s", book_url, e)
             return None
 
         tree = lxml_html.fromstring(resp.content)
 
-        # --- Title --- prefer og:title (clean), fall back to the title field
+        # --- Title --- h2
         title = ""
-        og = tree.xpath('//meta[@property="og:title"]/@content')
-        if og:
-            title = self._clean(og[0])
-        if not title:
-            parts = self._dd_links(tree, "title")
-            title = "; ".join(parts) if parts else self._dd_text(tree, "title")
+        h2 = tree.xpath('//h2')
+        if h2:
+            title = self._clean(h2[0].text_content())
         if not title:
             return None
 
-        # --- Authors --- (may be multiple <a> in the author dd)
-        authors = self._dd_links(tree, "author")
-        if not authors:
-            a = self._dd_text(tree, "author")
+        # --- Authors --- h3 (may contain multiple, comma/&-separated)
+        authors = []
+        h3 = tree.xpath('//h3')
+        if h3:
+            a = self._clean(h3[0].text_content())
             if a:
-                authors = [p.strip() for p in re.split(r"[;,]", a) if p.strip()]
+                authors = [p.strip() for p in re.split(r"[,&]", a) if p.strip()]
 
         match = MetaRecord(
-            id=book_id,
+            id=code,
             title=title,
             authors=authors,
             url=book_url,
             source=MetaSourceInfo(
                 id=self.__id__,
-                description=Biblioman.DESCRIPTION,
-                link=Biblioman.META_URL,
+                description=SFBG.DESCRIPTION,
+                link=SFBG.META_URL,
             ),
         )
 
-        # --- Cover --- og:image is the clean high-res path
+        rows = self._rows(tree)
+
+        # --- Cover --- predictable /covers/<PREFIX>/<CODE>.jpg, else scan imgs
         cover = ""
-        og_img = tree.xpath('//meta[@property="og:image"]/@content')
-        if og_img:
-            cover = og_img[0].strip()
+        imgs = [s for s in tree.xpath('//img/@src') if "cover" in s.lower()]
+        if imgs:
+            cover = urljoin(SFBG.BASE_URL, imgs[0])
         match.cover = cover if cover else generic_cover
 
-        # --- Description --- annotation field
-        match.description = self._dd_text(tree, "annotation")
-
-        # --- Publisher --- (entity-field-publisher)
-        match.publisher = self._dd_text(tree, "publisher") or None
-
-        # --- Published date --- prefer publish year, else translation year
-        year_text = (
-            self._dd_text(tree, "publishingYear")
-            or self._dd_text(tree, "dateOfTranslation")
-        )
-        ym = re.search(r"(\d{4})", year_text)
-        if ym:
-            match.publishedDate = ym.group(1) + "-01-01"
-
-        # --- Series + index --- (entity-field-sequence) e.g. "... №1"
-        seq = self._dd_text(tree, "sequence")
-        if seq:
-            sm = re.search(r"^(.*?)\s*(?:\u2116|#|No\.?)\s*([\d]+(?:\.\d+)?)", seq)
+        # --- Series --- (Поредица)  — SFBG usually has no explicit index number
+        series = rows.get("Поредица", "")
+        if series:
+            sm = re.search(r"^(.*?)\s*(?:\u2116|#|No\.?)\s*(\d+(?:\.\d+)?)$", series)
             if sm:
                 match.series = sm.group(1).strip(" ,;")
                 try:
@@ -202,23 +169,56 @@ class Biblioman(Metadata):
                 except ValueError:
                     match.series_index = 1
             else:
-                match.series = seq
+                match.series = series
                 match.series_index = 1
 
-        # --- Tags --- category + genre
+        # --- Publisher --- (Издател)
+        match.publisher = rows.get("Издател") or None
+
+        # --- Published date --- (Година)
+        year = rows.get("Година", "")
+        ym = re.search(r"(\d{4})", year)
+        if ym:
+            match.publishedDate = ym.group(1) + "-01-01"
+
+        # --- Description --- text following the <h4>Издателска анотация</h4>
+        match.description = self._annotation(tree)
+
+        # --- Tags --- nationality/genre hints (SFBG is SF/fantasy focused)
         tags = []
-        for fc in ("category", "genre"):
-            for v in (self._dd_links(tree, fc) or [self._dd_text(tree, fc)]):
-                v = v.strip()
-                if v and v not in tags:
-                    tags.append(v)
+        nat = rows.get("Националност")
+        # SFBG doesn't always expose a clean genre; leave tags minimal/empty
         match.tags = tags
 
-        # --- Language --- biblioman is Bulgarian editions
-        lang = self._dd_text(tree, "language")
-        match.languages = [lang] if lang else ["\u0431\u044a\u043b\u0433\u0430\u0440\u0441\u043a\u0438"]
+        # --- Language --- SFBG lists Bulgarian editions
+        match.languages = ["\u0431\u044a\u043b\u0433\u0430\u0440\u0441\u043a\u0438"]
 
-        # --- Identifiers --- biblioman has no ISBN field (uses УДК); id only
-        match.identifiers = {"biblioman": book_id}
+        # --- Identifiers --- ISBN (SFBG has it) + sfbg code
+        match.identifiers = {"sfbg": code}
+        isbn = rows.get("ISBN", "")
+        if isbn:
+            isbn_clean = re.sub(r"[^0-9Xx]", "", isbn)
+            if isbn_clean:
+                match.identifiers["isbn"] = isbn_clean
 
         return match
+
+    def _annotation(self, tree) -> str:
+        """Grab paragraph text following the 'Издателска анотация' h4 heading."""
+        # find the heading node
+        heads = tree.xpath(
+            '//h4[contains(normalize-space(.), "\u0430\u043d\u043e\u0442\u0430\u0446\u0438\u044f") '
+            'or contains(normalize-space(.), "\u0410\u043d\u043e\u0442\u0430\u0446\u0438\u044f")]'
+        )
+        if not heads:
+            return ""
+        h = heads[0]
+        # collect following siblings' text until the next heading
+        parts = []
+        for sib in h.itersiblings():
+            if sib.tag in ("h1", "h2", "h3", "h4", "h5", "table"):
+                break
+            txt = self._clean(sib.text_content())
+            if txt:
+                parts.append(txt)
+        return " ".join(parts).strip()
