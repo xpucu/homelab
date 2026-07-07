@@ -175,6 +175,19 @@ systemctl restart autocaliweb
 books, searching the original English title in Google gives rich data (keep the BG title
 field). Titles with no online source → manual entry.
 
+### Custom SFBG provider (Bulgarian SF/fantasy) — `sfbg.py`
+Second Bulgarian source, scrapes `sfbg.us` (SF/fantasy bibliography) — complements
+biblioman for genre titles it misses. File at
+`/opt/autocaliweb/cps/metadata_provider/sfbg.py` (backup `/root/sfbg.py`). Structure is
+simpler than biblioman: `h2`=title, `h3`=author, a `<table>` of `label:`/value rows
+(Поредица, Издател, Година, ISBN, Оригинал, Страници…), cover at
+`/covers/<PREFIX>/<CODE>.jpg`, annotation as text following the `<h4>Издателска анотация</h4>`
+heading. **Bonus: SFBG carries ISBN** (biblioman doesn't). 8s timeouts throughout.
+Same NO-survives-updates caveat — re-deploy from `/root/sfbg.py` after any ACW update.
+
+So Fetch Metadata now has THREE sources: Google (English/translated), Biblioman (BG
+general), SFBG (BG SF/fantasy) — covering each other's gaps.
+
 **Debug tip:** test the parser standalone against a known book with the venv python:
 `/opt/autocaliweb/venv/bin/python` + a small script hitting
 `https://biblioman.chitanka.info/books/<id>` and calling the `entity-field-*` xpath.
@@ -192,6 +205,7 @@ dateOfTranslation, category, genre, language, annotation, pageCount, translator,
 - [ ] Kindle send-to-device (optional)
 - [x] Disable broken metadata providers (amazon 503, douban hang)
 - [x] Custom Biblioman provider for Bulgarian metadata (`/root/biblioman.py` backup)
-- [ ] Re-deploy biblioman.py + re-disable amazon/douban AFTER any ACW update
+- [x] Custom SFBG provider for Bulgarian SF/fantasy (`/root/sfbg.py` backup)
+- [ ] Re-deploy biblioman.py + sfbg.py + re-disable amazon/douban AFTER any ACW update
 - [ ] Set INGEST_DIR to `/mnt/unas/Media/Books/ingest` + `WATCH_MODE=poll` (NFS needs polling)
 - [ ] Retire old CWA on the Windows host → **last Windows-Docker holdout gone**

@@ -52,6 +52,8 @@ needed and imports are same-filesystem moves.
 | [`autocaliweb.md`](autocaliweb.md) | Autocaliweb (Calibre-Web-Automated fork) ebook server on Proxmox via Helper-Script, with the Books library on the UNAS over NFS. |
 | [`proxmox-disk-replace-cluster-migration.md`](proxmox-disk-replace-cluster-migration.md) | Runbook for swapping a node's disk, reinstalling Proxmox with the same hostname, joining it into the cluster, and restoring guests (handling the VMID collisions, GPU passthrough, and NFS mounts). |
 | [`recyclarr.yml`](recyclarr.yml) | Recyclarr config (TRaSH-guide-backed quality profiles and custom formats) referenced by the arr-stack guide. |
+| [`biblioman.py`](biblioman.py) | Custom Autocaliweb/Calibre-Web metadata provider (GPLv3) that fetches Bulgarian book metadata by scraping [Biblioman](https://biblioman.chitanka.info/) — title, authors, series, publisher, year, tags, cover, and description. See [`autocaliweb.md` §6a](autocaliweb.md) for how it's deployed. |
+| [`sfbg.py`](sfbg.py) | Second custom Autocaliweb/Calibre-Web metadata provider (GPLv3) scraping [SFBG](https://sfbg.us/) for Bulgarian SF/fantasy titles — complements Biblioman for genre books and additionally carries ISBN. See [`autocaliweb.md` §6a](autocaliweb.md). |
 | [`archived/`](archived/) | Retired Docker-on-Windows setups — CWA ebook server (`docker-compose.yaml` + Synology-NFS-in-Docker guide) and a Portainer compose. Kept for reference; no longer in use. |
 
 ---
