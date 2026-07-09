@@ -16,7 +16,7 @@ shared storage across two NAS units.
 | Host | Role | Guests (ID — name) |
 | --- | --- | --- |
 | `pve` | Proxmox node A | 100 grocy · 101 prowlarr · 102 radarr · 103 sonarr · 104 bazarr · 105 lidarr · 106 readarr · 107 recyclarr (all LXC) |
-| `proxmox` | Proxmox node B | 100 plexy · 101 sabnzbd · 104 unbound (LXC) · **103 qbit (VM)** |
+| `proxmox` | Proxmox node B | 200 plexy · 101 sabnzbd · 114 unbound (LXC, DoT resolver :5335) · **103 qbit (VM)** |
 
 > CT = LXC container, VM = full virtual machine. `pct list` shows containers only;
 > `qm list` shows VMs. A guest missing from `pct list` is probably a VM.
@@ -528,6 +528,19 @@ Anything pointing at the OLD Windows arr instances needs updating to the new IPs
   notifications. ✅ DONE: old Windows client deleted, new pve client registered on
   notifiarr.com, all 9 integrations test green (Sonarr/Radarr/Readarr/Lidarr/Prowlarr/
   Plex/Tautulli/qBittorrent/SABnzbd).
+
+> **Notifiarr free-tier rate limit (5 API hits/sec).** The Connect → Notifiarr passthrough
+> (`/api/v1/notification/<app>`) posts **one API hit per event**; a burst over 5/s temporarily
+> blocks the key (`limit exceeded for non subscriber account … Api key blocked`). Bursts come
+> from **fan-out events** — a **season-pack import fires "On Import" once per episode file**
+> (a 10-episode pack = 10 hits in a second), plus "On Grab" storms and mass renames. **Fix:**
+> in each arr → **Settings → Connect → Notifiarr**, disable the high-volume triggers
+> (**On File Import, On Grab, On Rename, On Health Issue/Restored, On Manual Interaction**)
+> and keep only what you actually consume. Also confirm exactly **one** Notifiarr connection
+> per app and **one** running client — a stray duplicate doubles the hit rate (see the
+> "STOP the Windows client" note above). The block is a short cooldown, not a ban; it clears
+> once you're back under 5/s. Patron tier raises the limit to 15/s, but sane triggers make
+> that unnecessary.
 - Any dashboards, Homepage/Homarr, Tautulli, Overseerr/Jellyseerr, notification
   webhooks, etc. that referenced the old Windows Sonarr/Radarr endpoints.
 
