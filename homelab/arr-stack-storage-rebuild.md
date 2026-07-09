@@ -366,6 +366,10 @@ Then inside the container, **delete all `//Syn/...` CIFS lines from `/etc/fstab`
 **Updating Plex (Helper-Script LXC):** run `ct/plex.sh` from the host → Update. Do NOT
 use the "manual download" link in the Plex UI. Updated 1.43.1 → 1.43.2 this way.
 
+> **GPU hardware transcoding** (Intel Quick Sync passthrough into this LXC, plus the
+> JasperLake "disable HEVC encoding" gotcha) is documented separately in
+> [`gpu-passthrough-plex.md`](gpu-passthrough-plex.md).
+
 ---
 
 ## 8. App Configuration (clean build)
