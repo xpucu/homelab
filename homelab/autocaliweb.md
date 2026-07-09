@@ -58,6 +58,13 @@ Prompts:
 
 **Record the CTID and IP** it prints at the end — both needed next.
 
+> **As deployed:** CT **112** — 2 cores / 2048 MB RAM / 512 MB swap / **8 GB** rootfs
+> (`local-lvm`). CPU/RAM at the Helper-Script baseline; disk started at 6 GB and was
+> grown to 8 GB after the fact with `pct resize 112 rootfs +2G` (live, no reboot). Bump
+> resources later with `pct set 112 -cores <n> -memory <MB>`; for an HA-managed CT stop
+> it first via `ha-manager set ct:112 --state stopped`. Check thin-pool headroom (`lvs`)
+> before growing the disk — a resize is one-way.
+
 ---
 
 ## 2. Post-install — bind the UNAS into the CT (REQUIRED)
@@ -94,10 +101,41 @@ Open `http://<ip>:8083` — login `admin` / `admin123`.
 
 ## 4. Kindle Oasis integration (optional)
 
-- **Send-to-Kindle:** configure SMTP in ACW settings; add ACW's sender address to your
-  Amazon "approved personal document email" list. Then send books straight to the Oasis.
-- Or download converted **AZW3/MOBI** and sideload via USB.
-- ACW converts formats via Calibre binaries, so EPUB→Kindle-friendly is handled for you.
+Two ways to get books onto the Kindle: email (**Send-to-Kindle**) or **USB sideload**.
+ACW converts formats via Calibre binaries, so EPUB→Kindle-friendly is handled for you
+(modern Kindles accept EPUB directly; older ones want AZW3/MOBI).
+
+### 4.1 Send-to-Kindle over SMTP (email)
+
+> ⚠️ **Pick "Use standard e-mail account", NOT the Gmail OAuth2 option.** Selecting the
+> Gmail OAuth2 radio errors with `Found no valid gmail.json file with OAuth information` —
+> that path needs a Google Cloud OAuth client-secrets JSON and is not worth it. Standard
+> SMTP with an app password works fine.
+
+1. **Provider credentials.** For Gmail: enable 2-Step Verification, then create an
+   **App Password** (Google Account → Security → App passwords) — the normal account
+   password will NOT authenticate over SMTP.
+2. **ACW → Admin → Edit Basic Configuration → E-mail Server Settings**, account type
+   **standard e-mail account**:
+   - **SMTP hostname:** `smtp.gmail.com`
+   - **SMTP port / encryption:** `465` = SSL/TLS **or** `587` = STARTTLS (don't cross them)
+   - **SMTP login:** `<your-email>`
+   - **SMTP password:** `<app-password>`
+   - **From e-mail:** `<your-email>` (must match the login for Gmail)
+   - **Attachment size limit:** keep under the target's cap (Amazon rejects >50 MB)
+   - **Save and send test email** → confirm it arrives before continuing.
+3. **Per-user device address:** Admin → Users (or the user's Profile) → set
+   **"Send to Kindle E-mail Address"** to the device's `<name>@kindle.com` (found in Amazon
+   → Manage Your Content and Devices → Preferences → Personal Document Settings).
+4. **Allowlist the sender on Amazon:** add the **From** address to the *Approved Personal
+   Document E-mail List* (same Amazon page). Sends from unknown addresses are dropped
+   silently.
+5. Open a book → **Send to Kindle / Send to E-Reader** → pick format.
+
+### 4.2 USB sideload
+
+Download the converted **AZW3/MOBI** (or EPUB) from ACW and copy it to the Kindle over USB —
+no email/allowlist needed, and no 50 MB cap.
 
 ---
 
@@ -115,6 +153,56 @@ Open `http://<ip>:8083` — login `admin` / `admin123`.
   check the script page notes.
 - **Unprivileged + NFS squash:** files ACW writes to the UNAS show as the mapped anon
   user (cosmetic); writes work given the share's permissions.
+
+---
+
+## 5a. Move `metadata.db` to local disk (fixes the NFS locking/desync)
+
+SQLite over NFS is the root cause of the "database is locked" family of problems —
+including the symptom where deleting/converting a format removes the file on disk but
+leaves the format still listed in ACW (the file op succeeds, the DB commit doesn't). Fix:
+keep the **book files on the NFS share** but move **`metadata.db` to the container's local
+disk**, leaving a symlink behind so ACW's library path is unchanged.
+
+ACW has **no native split-library support** (see §6), so the symlink is the way. On
+Debian 13's modern SQLite, opening the DB through a symlink puts the `-wal`/`-journal`
+lock files next to the *real* (local) file — so all locking happens locally.
+
+Run inside the CT (`pct enter 112`), as root:
+
+```bash
+LIB=/mnt/unas/Media/Books/Calibre        # library root (where metadata.db lives)
+
+cp -a "$LIB/metadata.db" /mnt/unas/NAS_Backup/metadata.db.bak   # back up the catalog first
+systemctl stop autocaliweb
+
+mkdir -p /var/lib/autocaliweb-db
+mv "$LIB/metadata.db"     /var/lib/autocaliweb-db/metadata.db
+mv "$LIB"/metadata.db-wal /var/lib/autocaliweb-db/ 2>/dev/null   # usually none after clean stop
+mv "$LIB"/metadata.db-shm /var/lib/autocaliweb-db/ 2>/dev/null
+
+ln -s /var/lib/autocaliweb-db/metadata.db "$LIB/metadata.db"
+chown -R acw:acw /var/lib/autocaliweb-db
+
+systemctl start autocaliweb
+```
+
+Notes / gotchas:
+- **`chown -h` on the NFS-side symlink fails** with `Operation not permitted` — expected
+  (NFS squash), and harmless: symlink ownership doesn't govern access; the local target
+  (owned `acw:acw`) does.
+- **No ACW config change needed** — the library path is identical; only the file behind
+  `metadata.db` moved.
+- **Verify:** after a real metadata edit, the NFS side shows *only* the symlink (no
+  `metadata.db-wal/-shm/-journal`), and the local `metadata.db` mtime updates:
+  ```bash
+  ls -la "$LIB"/metadata.db*        # only: metadata.db -> /var/lib/autocaliweb-db/metadata.db
+  ls -la /var/lib/autocaliweb-db/   # metadata.db (acw:acw), mtime bumps on writes
+  ```
+- **Rollback:** `systemctl stop autocaliweb` → `rm "$LIB/metadata.db"` (the symlink) →
+  `cp -a /mnt/unas/NAS_Backup/metadata.db.bak "$LIB/metadata.db"` → start.
+- **Backups now:** `metadata.db` is no longer on the NAS, so it won't ride along with NAS
+  backups of the library — snapshot `/var/lib/autocaliweb-db/` (or the CT) separately.
 
 ---
 
@@ -202,7 +290,8 @@ dateOfTranslation, category, genre, language, annotation, pageCount, translator,
 - [ ] Run Helper-Script, record CTID + IP
 - [ ] Bind UNAS into CT, reboot, verify books visible
 - [ ] First-run: change password, set library `/mnt/unas/Media/Books`, ingest, providers
-- [ ] Kindle send-to-device (optional)
+- [x] Kindle send-to-device — standard SMTP (Gmail app password), test email received
+- [x] Moved `metadata.db` to local disk (`/var/lib/autocaliweb-db`, symlinked) — fixes NFS locking/desync
 - [x] Disable broken metadata providers (amazon 503, douban hang)
 - [x] Custom Biblioman provider for Bulgarian metadata (`/root/biblioman.py` backup)
 - [x] Custom SFBG provider for Bulgarian SF/fantasy (`/root/sfbg.py` backup)
