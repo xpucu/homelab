@@ -370,6 +370,40 @@ use the "manual download" link in the Plex UI. Updated 1.43.1 → 1.43.2 this wa
 > JasperLake "disable HEVC encoding" gotcha) is documented separately in
 > [`gpu-passthrough-plex.md`](gpu-passthrough-plex.md).
 
+**Remote access (manual port-forward — UniFi has no NAT-PMP/UPnP).** Plex's auto-mapping
+logs `NAT: PMP … Not Supported by gateway` and reports external port `0`, because UniFi
+doesn't do NAT-PMP/UPnP by default. Set it up manually:
+- **UniFi Network 9.x** (Zone-Based Firewall): the port-forward form moved to
+  **Policy Engine → Policy Table → Create Policy → type = Port Forwarding** (or just use the
+  Settings **search** box → "port forward"). Rule: **WAN TCP 32400 → `192.168.0.200:32400`**.
+  Use the **"Select Device"** link to pick `plexy` — free-typing the IP can throw a false
+  *"Please enter a valid IPv4 address"* error; selecting the device clears it.
+- **Plex → Settings → Remote Access → "Manually specify public port" = 32400** → Apply → goes
+  green. This also stops the NAT-PMP / `plex.direct:0` warnings (Plex no longer needs to
+  auto-map).
+- The UniFi **"WAN uses a dynamic IP → configure DDNS"** warning is **safe to ignore for
+  Plex** — PMS reports its current public IP to plex.tv and clients connect via the
+  `plex.direct` hostname, so a changing Cox WAN IP is handled automatically; no DDNS needed.
+  (Confirmed not behind CGNAT/double-NAT: UniFi's WAN IP equals the real public IP.)
+- **Pin the target:** set a **DHCP reservation** for `plexy` at `192.168.0.200` so the
+  forward can't point at the wrong host after a lease change.
+
+**Plex webhook / log-noise cleanup (done during a log review):**
+- **Bazarr webhook** was two malformed entries (one missing the port → hit port 80; one
+  missing the path → `405`). Correct single URL is
+  `http://bazarr:6767/api/webhooks/plex?apikey=<BAZARR_API_KEY>&instance=Bazarr` (fix under
+  **Plex → Settings → Webhooks**). Needs the `bazarr` name to resolve — see the static
+  `/etc/hosts` bridge until internal DNS exists.
+- **Custom server access URLs** had the field's *label text* pasted into the value
+  (`Invalid connection URL 'Custom server access URLs: https://…'`). Under **Settings →
+  Network**, set it to the bare `plex.direct` URL or leave it **empty** if not using a
+  reverse proxy.
+- Benign, ignorable log lines: `Unknown metadata type: folder`, `QueryParser: Invalid field`,
+  transcode `ping/stop without valid session ID`, `[FFMPEG] No quality level set`,
+  `CERT/OCSP … skipping stapling`, `Crash reporting disabled`. Watch only if repeating:
+  `Invalid library metadata ID <n>` (usually a stale client / a collection pointing at a
+  deleted item).
+
 ---
 
 ## 8. App Configuration (clean build)
@@ -537,6 +571,7 @@ Anything pointing at the OLD Windows arr instances needs updating to the new IPs
 | Helper-Script update fails on `jq` / under-provisioned | LXC below 2 vCPU / 2048 MB | Bump resources (`pct set <id> -cores 2 -memory 2048`), repair dpkg, retry |
 | SAB "not writable with special character filenames" | Download folder is on CIFS | Move incomplete to local disk; use NFS for completed |
 | Container `/mnt/x` is CIFS but should be NFS bind | Stale CIFS line in *container* fstab overriding intent | Remove CIFS lines from container fstab; media comes from host binds |
+| `cp: failed to preserve ownership … Operation not permitted` copying **to** a share | Squashed NFS export (UNAS all-squash) maps every client to one anon user — you can't `chown` on it, so `cp -a`/`cp -p` fail the ownership step and return non-zero (data *is* copied, but a `set -e` script then aborts) | Copy **bytes only** to squashed shares: `cp --preserve=timestamps` (or plain `cp`), never `cp -a`/`-p`. Note `mv` across filesystems is fine — it treats can't-preserve-ownership as a non-fatal warning and still returns 0. (Bit `acw-db-mode.sh`'s backup step.) |
 | Plex playback fails with **`s1001 (Network)`** on some files (esp. movies), others fine; log shows `MDE: video has neither a video stream nor an audio stream` → `Cannot make a decision because either the file is unplayable...` → HTTP 400 | **Corrupt media file** — full size but a leading zero-block (interrupted write / preallocated-but-incomplete download imported anyway). Not the mount/network/codec: healthy files Direct Play, the rotted one can't be analysed. The `Network` label is misleading | Probe the file with Plex's own ffmpeg: `FFMPEG_EXTERNAL_LIBS="…/Codecs/<build>-linux-x86_64/" "/usr/lib/plexmediaserver/Plex Transcoder" -i "<file>"` — `Invalid data … EBML` / no `Stream #` = corrupt. Confirm with `hexdump -C "<file>" | head` (leading `00`s). Scope both libraries with `plex-corrupt-scan.sh`. Fix: re-grab in Radarr/Sonarr (delete file → search) or restore a Synology snapshot; then Analyze the item. If **many** files across volumes are hit, suspect the NAS — check Storage Manager health + S.M.A.R.T. + run a Btrfs data scrub |
 
 ---
@@ -566,6 +601,22 @@ Anything pointing at the OLD Windows arr instances needs updating to the new IPs
 - **4K NOT safe on this thin pool** (~22 GB free). A single 40–80 GB 4K download would
   exhaust the pool mid-download before SAB moves/trims it. 4K needs more physical disk
   on the node or incomplete-on-NAS. 1080p focus is fine.
+- **Timezone convention = `America/Phoenix`.** All guests are set to Phoenix local time
+  (owner is in Phoenix; Arizona observes **no DST**, so local time carries no DST-ambiguity
+  downside — logs read in wall-clock time *and* stay unambiguous). Guests defaulted to UTC,
+  which made log-vs-wall-clock correlation painful. Set per container with:
+  ```bash
+  # inside the CT (unprivileged-safe; timedatectl may be refused, this always works)
+  ln -sf /usr/share/zoneinfo/America/Phoenix /etc/localtime
+  # fleet sweep from each node:
+  for id in $(pct list | awk 'NR>1{print $1}'); do pct exec "$id" -- ln -sf /usr/share/zoneinfo/America/Phoenix /etc/localtime 2>/dev/null; done
+  ```
+  Gotchas: (1) **running services cache TZ at process start** — restart each (Plex, *arr,
+  SAB) or reboot the CT for its logs to switch. (2) `pct exec` only touches **LXCs** — the
+  qBit **VM** needs `sudo timedatectl set-timezone America/Phoenix` inside it. (3) The
+  **Proxmox host nodes** are separate from their guests — set on each node if you want host
+  logs on Phoenix too. (4) `ln -sf …/localtime` doesn't update `/etc/timezone`; add
+  `echo 'America/Phoenix' > /etc/timezone` only if some app reads that for display.
 
 ## 12. Deployment Status (storage plumbing)
 
